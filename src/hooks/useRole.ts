@@ -4,12 +4,14 @@ export const useRole = () => {
   const { accesses, role, division } = useAuthStore();
 
   const canAccess = (access: string) => {
-    if (role == "superadmin" || !division) return true;
+    if (role == "superadmin" || !division || division == "supervisor")
+      return true;
     return accesses.includes(access);
   };
 
   const hasGroup = (group: string) => {
-    if (role == "superadmin" || !division) return true;
+    if (role == "superadmin" || !division || division == "supervisor")
+      return true;
     return accesses.filter((access) => access.startsWith(group)).length > 0;
   };
 
