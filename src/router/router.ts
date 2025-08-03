@@ -1,42 +1,18 @@
-import AuthLayout from "@/layout/auth-layout";
 import RootLayout from "@/layout/root-layout";
 import NotFound from "@/not-found";
-import Login from "@/views/auth/login";
 import Dashboard from "@/views/dashboard/dashboard";
-import Product from "@/views/product/product";
-import { createBrowserRouter, redirect } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
+import auth from "./routes/auth";
+import inventory from "./routes/inventory";
+import users from "./routes/users";
+import report from "./routes/report";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     Component: RootLayout,
-    children: [
-      { index: true, Component: Dashboard },
-      {
-        path: "product",
-        Component: Product,
-      },
-    ],
+    children: [{ index: true, Component: Dashboard }, ...inventory, ...users, ...report],
   },
-  {
-    path: "auth",
-    Component: AuthLayout,
-    children: [
-      {
-        index: true,
-        loader: () => {
-          return redirect("/auth/login");
-        },
-      },
-      { path: "login", Component: Login },
-      // { path: "register", Component: Register },
-    ],
-  },
-  {
-    path: "login",
-    loader: () => {
-      return redirect("/auth/login");
-    },
-  },
+  ...auth,
   { path: "*", Component: NotFound },
 ]);
