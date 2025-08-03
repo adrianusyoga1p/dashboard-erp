@@ -1,10 +1,13 @@
 import { apiAuthLogin } from "@/api/endpoints/auth";
+import { BaseInput } from "@/components/base/input";
 import { useAuthStore } from "@/stores/auth";
 import { useState, type FormEvent } from "react";
+import { LuEye } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const { setToken, setUser } = useAuthStore();
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -19,9 +22,13 @@ const Login = () => {
     if (!response.error) {
       setUser(response.data.user);
       setToken(response.data.accessToken.token);
-      setLoading(false);
       navigate("/");
     }
+    setLoading(false);
+  };
+
+  const handleShowingPassword = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -31,9 +38,8 @@ const Login = () => {
           <form onSubmit={submit} className="p-4 space-y-4 w-full">
             <div className="space-y-3">
               <label className="block font-medium">Email</label>
-              <input
+              <BaseInput
                 type="email"
-                className="p-3 w-full border border-black/30 rounded-lg focus:outline-none"
                 placeholder="Enter email"
                 onChange={(e) =>
                   setForm({
@@ -46,9 +52,8 @@ const Login = () => {
             </div>
             <div className="space-y-3">
               <label className="block font-medium">Password</label>
-              <input
-                type="password"
-                className="p-3 w-full border border-black/30 rounded-lg focus:outline-none"
+              <BaseInput
+                type={!showPassword ? 'password' : 'text'}
                 placeholder="Enter password"
                 onChange={(e) =>
                   setForm({
@@ -57,7 +62,15 @@ const Login = () => {
                   })
                 }
                 value={form.password}
-              />
+              >
+                <button
+                  type="button"
+                  onClick={handleShowingPassword}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 opacity-50"
+                >
+                  <LuEye />
+                </button>
+              </BaseInput>
             </div>
             <button
               disabled={loading}
