@@ -46,10 +46,10 @@ const BasePagination = ({
       <button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className={`px-3 py-1 rounded-lg ${
+        className={`px-3 h-8 rounded-lg transition-colors duration-300 ${
           currentPage === 1
             ? "text-gray-400 cursor-not-allowed"
-            : "hover:bg-gray-100"
+            : "hover:bg-gray-200/50"
         }`}
       >
         Prev
@@ -59,7 +59,7 @@ const BasePagination = ({
         <>
           <button
             onClick={() => handlePageChange(1)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200/50"
           >
             1
           </button>
@@ -74,7 +74,7 @@ const BasePagination = ({
           className={`w-8 h-8 flex items-center justify-center rounded-lg ${
             number === currentPage
               ? "bg-black text-white hover:bg-black/70"
-              : "hover:bg-gray-100"
+              : "hover:bg-gray-200/50"
           }`}
         >
           {number}
@@ -86,7 +86,7 @@ const BasePagination = ({
           {endPage < total - 1 && <span className="px-2">...</span>}
           <button
             onClick={() => handlePageChange(total)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-200/50 transition-colors duration-300"
           >
             {total}
           </button>
@@ -96,10 +96,10 @@ const BasePagination = ({
       <button
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === total}
-        className={`px-3 py-1 rounded-lg ${
+        className={`px-3 h-8 rounded-lg transition-colors duration-300 ${
           currentPage === total
             ? "text-gray-400 cursor-not-allowed"
-            : "hover:bg-gray-100"
+            : "hover:bg-gray-200/50"
         }`}
       >
         Next
