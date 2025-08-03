@@ -3,16 +3,19 @@ import type { Unit } from "./unit";
 
 export type Product = {
   id: string;
-  name: string;
-  currentQty: number;
+  name: string | null;
+  brandName: string | null;
+  categoryId: string | null;
   price: number;
+  code: string | null;
+  productSku: string | null;
+  description: string | null;
+  active: boolean;
   updateAt: string;
   createdAt: string;
-  productSku: string;
-  code: string;
-  categoryId: string;
-  status: 'pending' | 'active' | 'approved' | 'rejected';
-  category: Category;
+  category: Category | null;
+  currentQty: number;
+  minimumStock: number;
   unitInfo: {
     inputQty: number;
     factor: number;
@@ -20,5 +23,16 @@ export type Product = {
     isManual: boolean;
     baseUnit: Unit;
     smallestUnit: Unit;
-  };
+  } | null;
+};
+
+export type ProductPayload = {
+  name: string | null;
+  brandName: string | null;
+  code: string | null;
+  description: string | null;
+  categoryId: string | null;
+  price: number | null;
+  productSku: string | null;
+  active: boolean;
 };

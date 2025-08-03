@@ -1,7 +1,7 @@
 export type Role = {
   id: string;
   name: string;
-  code: string;
+  displayName: string;
   active: boolean;
   updatedAt: string;
   createdAt: string;

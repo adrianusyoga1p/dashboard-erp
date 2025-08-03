@@ -21,14 +21,23 @@ export type ApiResponse<T> = {
   };
 };
 
+export type ApiResponseDelete = {
+  error?: Error;
+  data: string;
+  meta: {
+    version: string;
+  };
+};
+
 export type WithMeta<T> = {
   data: T;
   meta: Meta;
 };
 
-export type BaseParam<T> = {
+export type BaseParam<T, Filter extends Partial<T> = Partial<T>> = {
   page?: number;
   limit?: number;
   order?: "asc" | "desc";
   orderBy?: keyof T;
-};
+  keyword?: string | null;
+} & Filter;

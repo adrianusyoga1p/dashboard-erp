@@ -1,28 +1,36 @@
-export type User = {
-  id: string;
+import type { Division } from "./division";
+import type { Role } from "./role";
+
+type UserAccount = {
+  id: string | null;
   name: string;
   email: string;
-  divisionId: string | null;
-  userId: string;
-  roleId: string;
+  userId: string | null;
+  roleId: string | null;
+  imei?: string | null;
+  pin?: string;
   active: boolean;
   updatedAt: string;
   createdAt: string;
-  division: null | {
-    id: string;
-    name: string;
-    displayName: string;
-    updatedAt: string;
-    createdAt: string;
-  };
-  adminData: null | {
-    fullName: string | null;
-    name: string;
-    id: string;
-    gender: "male" | "female";
-    joinAt: string;
-    phoneNumber: string;
-    createdAt: string;
-    updatedAt: string;
-  };
+};
+
+export type User = {
+  id: string;
+  fullName: string;
+  name: string;
+  email?: string;
+  birthDate: string | null;
+  birthPlace: string | null;
+  address: string | null;
+  phoneNumber: string;
+  imageId: string | null;
+  joinAt: string;
+  gender: "male" | "female";
+  active: boolean;
+  updatedAt: string;
+  createdAt: string;
+  admin?: UserAccount;
+  sales?: UserAccount;
+  role: Role | null;
+  division?: Division | null;
 };
