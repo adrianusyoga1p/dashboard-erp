@@ -107,7 +107,7 @@ const Dashboard = () => {
           </div>
         </div>
       ) : (
-        <h1 className="font-semibold text-lg">Welcom to Dashboard Page</h1>
+        <h1 className="font-semibold text-lg">Welcome to Dashboard Page</h1>
       )}
     </div>
   );
