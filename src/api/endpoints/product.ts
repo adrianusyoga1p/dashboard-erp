@@ -1,8 +1,13 @@
-import type { ApiResponse, WithMeta } from "@/types/common";
+import type {
+  ApiResponse,
+  ApiResponseDelete,
+  BaseParam,
+  WithMeta,
+} from "@/types/common";
 import apiClient from "../client";
-import type { Product } from "@/types/product";
+import type { Product, ProductPayload } from "@/types/product";
 
-export const apiCreateProduct = (data: unknown) => {
+export const apiCreateProduct = (data: ProductPayload) => {
   return apiClient<ApiResponse<Product>>({
     method: "POST",
     url: "/api/v1/product",
@@ -10,7 +15,7 @@ export const apiCreateProduct = (data: unknown) => {
   });
 };
 
-export const apiGetListProduct = (params?: unknown) => {
+export const apiGetListProduct = (params?: BaseParam<Product>) => {
   return apiClient<ApiResponse<WithMeta<Product[]>>>({
     method: "GET",
     url: "/api/v1/product",
@@ -21,21 +26,21 @@ export const apiGetListProduct = (params?: unknown) => {
 export const apiGeDetailProduct = (id: string) => {
   return apiClient<ApiResponse<Product>>({
     method: "GET",
-    url: "/api/v1/product/" + id,
+    url: `/api/v1/product/${id}`,
   });
 };
 
-export const apiUpdateProduct = (id: string, data: unknown) => {
+export const apiUpdateProduct = (id: string, data: ProductPayload) => {
   return apiClient<ApiResponse<Product>>({
     method: "PUT",
-    url: "/api/v1/product/" + id,
+    url: `/api/v1/product/${id}`,
     data,
   });
 };
 
 export const apiDeleteProduct = (id: string) => {
-  return apiClient<ApiResponse<Product>>({
+  return apiClient<ApiResponseDelete>({
     method: "DELETE",
-    url: "/api/v1/product/" + id,
-  }); 
-}
+    url: `/api/v1/product/${id}`,
+  });
+};
