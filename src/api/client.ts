@@ -1,4 +1,4 @@
-import { getCurrentToken } from "@/stores/auth";
+import { getCurrentToken, useAuthStore } from "@/stores/auth";
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 
 type APIResolved<T> = (response: T) => void;
@@ -21,7 +21,12 @@ const apiClient = <T>(payload: AxiosRequestConfig) => {
 
     baseClient.interceptors.response.use(
       (response) => response,
-      (error) => Promise.reject(error)
+      (error) => {
+        if (error.response && error.response.status == 401) {
+          useAuthStore.getState().logout();
+        }
+        return Promise.reject(error);
+      }
     );
 
     baseClient<T>(payload)
