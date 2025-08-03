@@ -6,7 +6,7 @@ import {
   LuClipboardList,
   LuX,
 } from "react-icons/lu";
-import { NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useRole } from "@/hooks/useRole";
 import { useScreen } from "@/hooks/useScreen";
@@ -122,8 +122,10 @@ export const LayoutSidebar = () => {
           : "-translate-x-60"
       }`}
     >
-      <div className="h-16 p-3 flex items-center gap-4 justify-between">
-        <img src="/img/logo.png" alt="logo" className="h-7 object-contain" />
+      <div className="h-16 py-3 px-7 flex items-center gap-4 justify-between relative">
+        <Link to={'/'}>
+          <img src="/img/logo.png" alt="logo" className="h-7 object-contain" />
+        </Link>
         {isMobile && (
           <button
             onClick={toggleSidebar}
