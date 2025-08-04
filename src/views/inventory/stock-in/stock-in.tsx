@@ -7,8 +7,10 @@ import BaseAlert from "@/components/base/alert";
 import { StockInTable } from "./stock-in-table";
 import type { BaseParam } from "@/types/common";
 import { BaseInput } from "@/components/base/input";
+import { useRole } from "@/hooks/useRole";
 
 const StockInPage = () => {
+  const { canAccess } = useRole();
   const [state, setState] = useState({
     loading: false,
   });
@@ -152,17 +154,22 @@ const StockInPage = () => {
       />
 
       <div className="space-y-6">
-        <div className="flex gap-4 items-center justify-between">
-          <h1 className="font-semibold text-lg">Stock In Management</h1>
-          <BaseButton
-            disabled={state.loading || isFormEmpty()}
-            onClick={submitStockIn}
-          >
-            Add Stock
-          </BaseButton>
-        </div>
-        <StockInForm form={form} setForm={setForm} />
+        {canAccess("stock_in_create") && (
+          <>
+            <div className="flex gap-4 items-center justify-between">
+              <h1 className="font-semibold text-lg">Stock In Management</h1>
+              <BaseButton
+                disabled={state.loading || isFormEmpty()}
+                onClick={submitStockIn}
+              >
+                Add Stock
+              </BaseButton>
+            </div>
+            <StockInForm form={form} setForm={setForm} />
+          </>
+        )}
         <div className="space-y-4">
+          <h1 className="font-semibold text-lg">Stock In Table</h1>
           <form onSubmit={handleSearch}>
             <BaseInput
               className="w-fit min-w-60"
