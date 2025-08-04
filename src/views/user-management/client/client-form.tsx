@@ -4,12 +4,27 @@ import { BaseTextarea } from "@/components/base/textarea";
 import type { ClientPayload } from "@/types/client";
 import { useEffect, type ChangeEvent } from "react";
 import { Popup } from "react-leaflet";
+import { useMap } from "react-leaflet";
 
 interface ClientFormContentProps {
   form: ClientPayload;
   setForm: React.Dispatch<React.SetStateAction<ClientPayload>>;
   type: "add" | "edit" | "detail";
 }
+
+const DisableInteraction = () => {
+  const map = useMap();
+
+  map.dragging.disable();
+  map.scrollWheelZoom.disable();
+  map.doubleClickZoom.disable();
+  map.boxZoom.disable();
+  map.keyboard.disable();
+  map.touchZoom.disable();
+  map.zoomControl.remove();
+
+  return null;
+};
 
 export const ClientForm = ({
   form,
@@ -128,7 +143,9 @@ export const ClientForm = ({
               {form.storeName} <br /> {form.address}
             </Popup>
           }
-        />
+        >
+          {type == 'detail' && <DisableInteraction />}
+        </BaseMaps>
       )}
     </div>
   );
