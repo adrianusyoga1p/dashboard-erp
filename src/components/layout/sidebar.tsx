@@ -54,7 +54,7 @@ export const LayoutSidebar = () => {
     menuItem("Inventory", undefined, <LuPackage />, true, [
       menuChild("/category", "Category", hasGroup("category")),
       menuChild("/product", "Product", hasGroup("product")),
-      menuChild("/stock-in", "Stock In", hasGroup("stock")),
+      menuChild("/stock-in", "Stock In", hasGroup("stock_in")),
       // menuChild("/stock-out", "Stock Out", hasGroup("stock")),
     ]),
     menuItem("User Management", undefined, <LuUser />, true, [
@@ -108,7 +108,7 @@ export const LayoutSidebar = () => {
     } else {
       setShow(true);
     }
-  }, [isMobile]);
+  }, [isMobile, pathname]);
 
   return (
     <aside
