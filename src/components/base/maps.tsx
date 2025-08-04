@@ -5,10 +5,11 @@ import {
   Marker,
   useMap,
   useMapEvents,
+  type MapContainerProps,
 } from "react-leaflet";
 import type { ClientPayload } from "@/types/client";
 
-interface BaseMapsProps {
+interface BaseMapsProps extends MapContainerProps {
   setForm: React.Dispatch<React.SetStateAction<ClientPayload>>;
   position: [number, number];
   popUp?: ReactNode;
@@ -62,7 +63,13 @@ function CustomWheelZoomControl() {
   return null;
 }
 
-const BaseMaps = ({ setForm, position, popUp }: BaseMapsProps) => {
+const BaseMaps = ({
+  setForm,
+  position,
+  popUp,
+  children,
+  ...props
+}: BaseMapsProps) => {
   return (
     <MapContainer
       attributionControl={false}
@@ -70,11 +77,13 @@ const BaseMaps = ({ setForm, position, popUp }: BaseMapsProps) => {
       zoom={20}
       style={{ height: "300px" }}
       scrollWheelZoom={false}
+      {...props}
     >
       <TileLayer url="https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
       <LocationPicker setForm={setForm} />
       <CustomWheelZoomControl />
       <Marker position={position}>{popUp}</Marker>
+      {children}
     </MapContainer>
   );
 };
