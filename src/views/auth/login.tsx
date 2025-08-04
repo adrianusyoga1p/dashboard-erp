@@ -32,7 +32,7 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full h-full grid grid-cols-2 gap-8 items-center">
+    <div className="w-full h-full grid sm:grid-cols-2 gap-8 items-center">
       <div className="col-span-1">
         <div className="max-w-md mx-auto">
           <form onSubmit={submit} className="p-4 space-y-4 w-full">
@@ -82,7 +82,7 @@ const Login = () => {
           </form>
         </div>
       </div>
-      <div className="col-span-1 h-full rounded-xl bg-black"></div>
+      <div className="col-span-1 h-full rounded-xl bg-black max-sm:hidden"></div>
     </div>
   );
 };
