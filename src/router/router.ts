@@ -11,7 +11,12 @@ export const router = createBrowserRouter([
   {
     path: "/",
     Component: RootLayout,
-    children: [{ index: true, Component: Dashboard }, ...inventory, ...users, ...report],
+    children: [
+      { index: true, Component: Dashboard },
+      ...inventory,
+      ...users,
+      ...report,
+    ],
   },
   ...auth,
   { path: "*", Component: NotFound },

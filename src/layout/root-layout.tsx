@@ -4,10 +4,17 @@ import { useScreen } from "@/hooks/useScreen";
 import { useAuthStore } from "@/stores/auth";
 import { useUIStore } from "@/stores/ui";
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 
 function RootLayout() {
-  const { token, user } = useAuthStore();
+  const { token, user, getAuthMe } = useAuthStore();
+  const location = useLocation();
+  useEffect(() => {
+    if (token) {
+      getAuthMe();
+    }
+  }, [location.pathname, token]);
+
   const navigate = useNavigate();
 
   useEffect(() => {
