@@ -1,4 +1,4 @@
-import { getCurrentToken, useAuthStore } from "@/stores/auth";
+import { useAuthStore } from "@/stores/auth";
 import axios, { type AxiosError, type AxiosRequestConfig } from "axios";
 
 type APIResolved<T> = (response: T) => void;
@@ -13,9 +13,17 @@ const apiClient = <T>(payload: AxiosRequestConfig) => {
     });
 
     baseClient.interceptors.request.use((config) => {
-      const token = getCurrentToken();
+      const { token, businessId } = useAuthStore.getState();
 
       if (token) config.headers.Authorization = `Bearer ${token}`;
+
+      if (businessId) {
+        config.params = {
+          ...config.params,
+          businessId,
+        };
+      }
+
       return config;
     });
 
