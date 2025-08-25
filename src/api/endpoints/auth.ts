@@ -6,7 +6,7 @@ import type { User } from "@/types/user";
 export const apiAuthLogin = (data: { email: string; password: string }) => {
   return apiClient<ApiResponse<AuthLogin>>({
     method: "POST",
-    url: "api/v1/auth/login",
+    url: "/api/v1/auth/login",
     data,
   });
 };
