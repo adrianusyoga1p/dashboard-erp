@@ -6,6 +6,7 @@ import type {
 } from "@/types/common";
 import apiClient from "../client";
 import type { Product, ProductPayload } from "@/types/product";
+import type { AxiosProgressEvent } from "axios";
 
 export const apiCreateProduct = (data: ProductPayload) => {
   return apiClient<ApiResponse<Product>>({
@@ -42,5 +43,24 @@ export const apiDeleteProduct = (id: string) => {
   return apiClient<ApiResponseDelete>({
     method: "DELETE",
     url: `/api/v1/product/${id}`,
+  });
+};
+
+export const apiImportProduct = (
+  file: File,
+  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
+) => {
+  return apiClient<
+    ApiResponse<
+      Product[] & {
+        inserted: number;
+      }
+    >
+  >({
+    headers: { "Content-Type": "multipart/form-data" },
+    method: "POST",
+    url: "/api/v1/product/import-product",
+    data: { file },
+    onUploadProgress,
   });
 };
