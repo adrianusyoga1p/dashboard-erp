@@ -9,3 +9,10 @@ export const apiGetListReportOrder = (params: BaseParam<ReportOrder>) => {
     params,
   });
 };
+
+export const apiGetDetailReportOrder = (id: string) => {
+  return apiClient<ApiResponse<ReportOrder>>({
+    method: "GET",
+    url: "/api/v1/order/report/" + id,
+  });
+};
