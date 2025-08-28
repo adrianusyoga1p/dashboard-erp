@@ -7,21 +7,21 @@ import { useEffect } from "react";
 
 export const LayoutNavbar = () => {
   const { user, logout } = useAuthStore();
-  const isMobile = useScreen("(max-width: 640px)");
+  const isResponsive = useScreen("(max-width: 1024px)");
   const { toggleSidebar, showSidebar, setShow } = useUIStore();
 
   useEffect(() => {
-    if (isMobile) {
+    if (isResponsive) {
       setShow(false);
     } else {
       setShow(true);
     }
-  }, [isMobile]);
+  }, [isResponsive]);
 
   return (
     <nav
       className={`fixed top-0 left-0 bg-white px-6 border-b border-gray-200 transition-all duration-300 z-20 ${
-        isMobile
+        isResponsive
           ? "w-full ml-0"
           : showSidebar
           ? "ml-60 w-[calc(100%_-_15rem)]"
@@ -43,9 +43,11 @@ export const LayoutNavbar = () => {
                   <h4 className="font-semibold">
                     {user?.fullName || user?.name}
                   </h4>
-                  {(user?.division || user?.role) && (
+                  {(user?.division || user?.role || user?.business) && (
                     <span className="text-xs">
-                      {user?.division?.displayName || user.role?.displayName}
+                      {user?.division?.displayName ||
+                        user.role?.displayName ||
+                        user.business?.companyName}
                     </span>
                   )}
                 </div>
