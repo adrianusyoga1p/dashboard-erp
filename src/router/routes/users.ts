@@ -1,5 +1,5 @@
 import AdminPage from "@/views/user-management/admin/admin";
-import ClientPage from "@/views/user-management/client/client";
+import CustomerPage from "@/views/user-management/customer/customer";
 import DivisionPage from "@/views/user-management/division/division";
 import SalesPage from "@/views/user-management/sales/sales";
 import UserPage from "@/views/user-management/user/user";
@@ -22,7 +22,7 @@ export default [
     Component: SalesPage,
   },
   {
-    path: "client",
-    Component: ClientPage,
+    path: "customer",
+    Component: CustomerPage,
   },
 ];
