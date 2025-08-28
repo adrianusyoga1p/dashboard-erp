@@ -1,4 +1,5 @@
 import { apiAuthGetMe } from "@/api/endpoints/auth";
+import type { Business } from "@/types/business";
 import type { User } from "@/types/user";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
@@ -9,6 +10,9 @@ export interface AuthState {
   role: string | null;
   division: string | null;
   accesses: string[];
+  businessId: string | null;
+  business: Business | null;
+  setBusiness: (business: Business) => void;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
   getAuthMe: () => Promise<void>;
@@ -23,6 +27,14 @@ export const useAuthStore = create<AuthState>()(
       division: null,
       role: null,
       accesses: [],
+      businessId: null,
+      business: null,
+      setBusiness: (business: Business) => {
+        set({
+          business,
+          businessId: business.id
+        });
+      },
       setUser: (user: User) => {
         set({
           user,
@@ -42,6 +54,8 @@ export const useAuthStore = create<AuthState>()(
             role: data.role?.name,
             division: data.division?.name,
             accesses: data.division?.accesses.map((a) => a.accessName),
+            businessId: data.businessId,
+            business: data.business
           });
         }
       },
@@ -56,7 +70,8 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: "user",
+      name: "token",
+      partialize: (state) => ({ token: state.token, businessId: state.businessId }),
     }
   )
 );
