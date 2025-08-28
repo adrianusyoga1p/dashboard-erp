@@ -4,7 +4,7 @@ import { useFormatter } from "@/hooks/useFormatter";
 import { cn } from "@/utils/utils";
 import { LuCircleCheck, LuCircleX } from "react-icons/lu";
 
-interface ColumnDefinition {
+export interface ColumnDefinition {
   title: string;
   key: string;
   type?:
@@ -14,6 +14,7 @@ interface ColumnDefinition {
     | "price"
     | "datetime"
     | "date"
+    | "number"
     | "boolean";
   align?: "left" | "center" | "right";
   width?: number | string;
@@ -24,12 +25,12 @@ interface BaseTableProps<T>
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "slot"> {
   columns: ColumnDefinition[];
   source: T[];
-  page: number;
+  page?: number;
   slot?: Record<string, (data: T, index: number) => React.ReactNode>;
   loading?: boolean;
-  total: number;
-  limit: number;
-  onPageChange: (page: number) => void;
+  total?: number;
+  limit?: number;
+  onPageChange?: (page: number) => void;
   noDataText?: string;
   loadingText?: string;
 }
@@ -64,7 +65,7 @@ const BaseTable = <T extends Record<string, unknown>>({
   };
 
   const handlePageChange = (newPage: number) => {
-    onPageChange(newPage);
+    if (onPageChange) onPageChange(newPage);
   };
 
   const PriceCell = ({ value }: { value: number | null | undefined }) => {
@@ -102,8 +103,8 @@ const BaseTable = <T extends Record<string, unknown>>({
             </tr>
           </thead>
 
-          {!loading && (
-            <tbody className="text-sm-3">
+          {!loading && source && source.length > 0 && (
+            <tbody className="text-sm">
               {source?.map((data, index) => (
                 <tr
                   key={`row-${index}`}
@@ -123,7 +124,12 @@ const BaseTable = <T extends Record<string, unknown>>({
                       )}
                     >
                       {column.type === "increment" ? (
-                        <span>{(page - 1) * limit + index + 1}.</span>
+                        <span>
+                          {((page as number) - 1) * (limit as number) +
+                            index +
+                            1}
+                          .
+                        </span>
                       ) : column.type === "slot" && slot[column.key] ? (
                         slot[column.key](data, index)
                       ) : column.type === "price" ? (
@@ -148,6 +154,8 @@ const BaseTable = <T extends Record<string, unknown>>({
                             <LuCircleX className="text-red-600" />
                           )}
                         </div>
+                      ) : column.type === "number" ? (
+                        <>{getDataByKey(data, column.key) || 0}</>
                       ) : (
                         <>
                           {(() => {
@@ -167,23 +175,24 @@ const BaseTable = <T extends Record<string, unknown>>({
           )}
         </table>
 
-        {(!source || source.length === 0) && !loading && (
-          <div className="p-4 text-center text-sm text-gray-500 sticky left-0 w-full flex items-center justify-center top-0 min-h-60">
-            {noDataText}
+        {loading && (
+          <div className="p-4 text-center text-gray-700 sticky left-0 w-full flex items-center justify-center top-0 min-h-60">
+            {loadingText}
           </div>
         )}
 
-        {loading && (
-          <div className="p-4 text-center text-sm text-gray-500 sticky left-0 w-full flex items-center justify-center top-0 min-h-60">
-            {loadingText}
+        {!loading && (!source || source.length === 0) && (
+          <div className="px-4 py-24 sticky left-0 w-full flex flex-col gap-8 items-center justify-center top-0 min-h-60">
+            <img src="/img/empty.png" alt="empty" />
+            <p className="text-center text-sm text-gray-500">{noDataText}</p>
           </div>
         )}
       </div>
 
-      {total > 1 && (
+      {(total as number) > 1 && (
         <BasePagination
-          total={total}
-          page={page}
+          total={total as number}
+          page={page as number}
           onPageChange={handlePageChange}
         />
       )}
