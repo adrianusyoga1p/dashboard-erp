@@ -1,23 +1,23 @@
 import {
-  apiDeleteCategory,
-  apiGetListCategory,
+  apiDeleteUnitCategory,
+  apiGetListUnitCategory,
 } from "@/api/endpoints/category";
 import { BaseInput } from "@/components/base/input";
 import BaseTable from "@/components/base/table";
 import { BaseTooltip } from "@/components/base/tooltip";
-import type { Category } from "@/types/category";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { CategorySheet } from "./category-sheet";
 import { BaseButton } from "@/components/base/button";
 import { LuEye, LuPencil, LuTrash } from "react-icons/lu";
 import BaseAlert from "@/components/base/alert";
 import type { BaseParam } from "@/types/common";
 import { useRole } from "@/hooks/useRole";
+import { UnitCategorySheet } from "./unit-category-sheet";
+import type { UnitCategory } from "@/types/unit";
 
-export const CategoryTable = () => {
+export const UnitCategoryTable = () => {
   const { canAccess } = useRole();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [params, setParams] = useState<BaseParam<Category>>({
+  const [unitCategories, setUnitCategories] = useState<UnitCategory[]>([]);
+  const [params, setParams] = useState<BaseParam<UnitCategory>>({
     page: 1,
     limit: 10,
     order: "desc",
@@ -42,29 +42,37 @@ export const CategoryTable = () => {
     }));
   };
 
-  const loadCategories = useCallback(
+  const loadUnitCategories = useCallback(
     async (keyword?: string) => {
-      const { data, error } = await apiGetListCategory({
+      setAlertState((prev) => ({
+        ...prev,
+        loading: true,
+      }));
+      const { data, error } = await apiGetListUnitCategory({
         ...params,
         keyword,
       });
 
       if (!error && data.data) {
-        setCategories(data.data);
+        setUnitCategories(data.data);
         setTotalPage(data.meta?.totalPage ?? 1);
       }
+      setAlertState((prev) => ({
+        ...prev,
+        loading: false,
+      }));
     },
     [params.page, params.limit, params.order, params.orderBy]
   );
 
-  const deleteCategory = async (id: string) => {
+  const deleteUnitCategory = async (id: string) => {
     setAlertState({
       isOpen: true,
       type: "warning",
       title: "Delete Confirmation",
       message: "Are you sure you want to delete this category?",
       onConfirm: async () => {
-        const { data, error } = await apiDeleteCategory(id);
+        const { data, error } = await apiDeleteUnitCategory(id);
         setAlertState({
           isOpen: true,
           type: data ? "success" : "error",
@@ -72,7 +80,7 @@ export const CategoryTable = () => {
           message: data
             ? "Category deleted successfully!"
             : error?.message || "Failed to delete category",
-          onConfirm: () => loadCategories(),
+          onConfirm: () => loadUnitCategories(),
           showCancel: false,
           loading: data || error ? false : true,
         });
@@ -82,14 +90,14 @@ export const CategoryTable = () => {
     });
   };
 
-  const categoriesTableSlots = {
-    actions: (category: Category) => (
+  const unitCategoriesTableSlots = {
+    actions: (category: UnitCategory) => (
       <div className="flex items-center justify-center gap-2">
-        {canAccess("category_read") && (
-          <CategorySheet
+        {canAccess("unit-category_read") && (
+          <UnitCategorySheet
             type="detail"
-            categoryData={category}
-            loadData={() => loadCategories("")}
+            unitCategoryData={category}
+            loadData={() => loadUnitCategories()}
             trigger={
               <div>
                 <BaseTooltip
@@ -99,18 +107,18 @@ export const CategoryTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Detail Category</p>
+                  <p>Detail</p>
                 </BaseTooltip>
               </div>
             }
           />
         )}
 
-        {canAccess("category_update") && (
-          <CategorySheet
+        {canAccess("unit-category_update") && (
+          <UnitCategorySheet
             type="edit"
-            categoryData={category}
-            loadData={() => loadCategories("")}
+            unitCategoryData={category}
+            loadData={() => loadUnitCategories()}
             trigger={
               <div>
                 <BaseTooltip
@@ -120,27 +128,27 @@ export const CategoryTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Edit Category</p>
+                  <p>Edit</p>
                 </BaseTooltip>
               </div>
             }
           />
         )}
 
-        {canAccess("category_delete") && (
+        {canAccess("unit-category_delete") && (
           <BaseTooltip
             trigger={
               <BaseButton
                 model="outline"
                 size="sm"
                 className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
-                onClick={() => deleteCategory(category.id)}
+                onClick={() => deleteUnitCategory(category.id)}
               >
                 <LuTrash />
               </BaseButton>
             }
           >
-            <p>Delete Category</p>
+            <p>Delete</p>
           </BaseTooltip>
         )}
       </div>
@@ -148,16 +156,16 @@ export const CategoryTable = () => {
   };
 
   useEffect(() => {
-    loadCategories(params.keyword || "");
-  }, [loadCategories]);
+    loadUnitCategories(params.keyword || "");
+  }, [loadUnitCategories]);
 
   const handleSearch = useCallback(
     (e: FormEvent) => {
       e?.preventDefault();
-      loadCategories(params.keyword || "");
+      loadUnitCategories(params.keyword || "");
       setParams((prev) => ({ ...prev, page: 1 }));
     },
-    [params.keyword, loadCategories]
+    [params.keyword, loadUnitCategories]
   );
 
   const AlertFooter = () => {
@@ -215,29 +223,30 @@ export const CategoryTable = () => {
               placeholder="Search keyword..."
             />
           </form>
-          {canAccess("product_create") && (
-            <CategorySheet
+          {canAccess("unit-category_create") && (
+            <UnitCategorySheet
               type="add"
-              loadData={() => loadCategories("")}
-              trigger={<BaseButton>Add Category</BaseButton>}
+              loadData={() => loadUnitCategories()}
+              trigger={<BaseButton>Add Unit Category</BaseButton>}
             />
           )}
         </div>
-        <BaseTable<Category>
+        <BaseTable<UnitCategory>
           columns={[
             { title: "#", key: "id", type: "increment" },
             { title: "Actions", key: "actions", type: "slot" },
             { title: "Name", key: "name" },
-            { title: "Code", key: "code" },
             { title: "Active", key: "active", type: "boolean" },
             { title: "Created At", key: "createdAt", type: "datetime" },
           ]}
-          source={categories}
+          source={unitCategories}
           page={params.page || 1}
-          slot={categoriesTableSlots}
+          slot={unitCategoriesTableSlots}
           total={totalPage}
           limit={params.limit || 10}
           onPageChange={onPageChange}
+          noDataText="Data category is empty"
+          loading={alertState.loading}
         />
       </div>
     </>

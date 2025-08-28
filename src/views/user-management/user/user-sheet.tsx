@@ -1,19 +1,27 @@
+import { apiGetDetailUser } from "@/api/endpoints/user";
 import { BaseSheet } from "@/components/base/sheet";
 import { useFormatter } from "@/hooks/useFormatter";
 import type { User } from "@/types/user";
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 
 interface UserSheetProps {
-  userData?: User;
-  loadData: () => void;
+  id: string;
   trigger?: ReactNode;
 }
 
-export const UserSheet = ({ userData, loadData, trigger }: UserSheetProps) => {
+export const UserSheet = ({ id, trigger }: UserSheetProps) => {
+  const [user, setUser] = useState<User | null>(null);
   const [state, setState] = useState({
     show: false,
   });
   const { formatDateTime } = useFormatter();
+
+  const loadDetailUser = useCallback(async () => {
+    const { data } = await apiGetDetailUser(id);
+    if (data) {
+      setUser(data as User);
+    }
+  }, []);
 
   return (
     <BaseSheet
@@ -23,56 +31,56 @@ export const UserSheet = ({ userData, loadData, trigger }: UserSheetProps) => {
           ...prev,
           show: isOpen,
         }));
-        loadData();
+        if (isOpen) loadDetailUser();
       }}
       trigger={trigger}
-      headerTitle={`Detail User ${userData?.fullName || userData?.name}`}
+      headerTitle={`Detail User ${user?.fullName || user?.name}`}
     >
       <div className="space-y-6 p-4 relative overflow-y-auto">
         <div>
           <label className="font-semibold text-sm block mb-2">User Name</label>
-          <p>{userData?.name || "-"}</p>
+          <p>{user?.name || "-"}</p>
         </div>
         <div>
           <label className="font-semibold text-sm block mb-2">
             User Full Name
           </label>
-          <p>{userData?.fullName || "-"}</p>
+          <p>{user?.fullName || "-"}</p>
         </div>
         <div>
           <label className="font-semibold text-sm block mb-2">
             User Division Name
           </label>
-          <p>{userData?.division?.displayName || "-"}</p>
+          <p>{user?.division?.displayName || "-"}</p>
         </div>
         <div>
           <label className="font-semibold text-sm block mb-2">
             User Role Name
           </label>
-          <p>{userData?.role?.displayName || "-"}</p>
+          <p>{user?.role?.displayName || "-"}</p>
         </div>
         <div>
           <label className="font-semibold text-sm block mb-2">User Email</label>
-          <p>{userData?.email || "-"}</p>
+          <p>{user?.email || "-"}</p>
         </div>
         <div>
           <label className="font-semibold text-sm block mb-2">
             User Phonenumber
           </label>
-          <p>{userData?.phoneNumber || "-"}</p>
+          <p>{user?.phoneNumber || "-"}</p>
         </div>
         <div>
           <label className="font-semibold text-sm block mb-2">
             User Gender
           </label>
-          <p className="capitalize">{userData?.gender || "-"}</p>
+          <p className="capitalize">{user?.gender || "-"}</p>
         </div>
         <div>
           <label className="font-semibold text-sm block mb-2">
             User Join At
           </label>
           <p className="capitalize">
-            {formatDateTime(userData?.joinAt as string) || "-"}
+            {formatDateTime(user?.joinAt as string) || "-"}
           </p>
         </div>
       </div>

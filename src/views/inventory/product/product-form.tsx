@@ -2,15 +2,16 @@ import { BaseButton } from "@/components/base/button";
 import { BaseInput } from "@/components/base/input";
 import { BaseSwitch } from "@/components/base/switch";
 import { BaseTextarea } from "@/components/base/textarea";
-import type { Category } from "@/types/category";
-import type { ProductPayload } from "@/types/product";
+import type { ProductPayload, ProductCategory } from "@/types/product";
+import type { Unit } from "@/types/unit";
 import { type ChangeEvent } from "react";
 
 interface ProductFormContentProps {
   type?: "add" | "detail" | "edit";
   form: ProductPayload;
   setForm: React.Dispatch<React.SetStateAction<ProductPayload>>;
-  category: Category[];
+  category: ProductCategory[];
+  unit: Unit[];
 }
 
 export const ProductForm = ({
@@ -18,6 +19,7 @@ export const ProductForm = ({
   form,
   setForm,
   category,
+  unit,
 }: ProductFormContentProps) => {
   const onChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -54,15 +56,15 @@ export const ProductForm = ({
             Product Category
           </label>
           <select
-            value={form.categoryId as string}
+            value={form.productCategoryId as string}
             onChange={onChange}
             disabled={type === "detail"}
-            name="categoryId"
+            name="productCategoryId"
             className="px-3 py-2.5 w-full border border-black/30 rounded-lg focus:outline-black"
           >
             <option value="">Select product category</option>
             {category &&
-              category.map((data: Category) => (
+              category.map((data: ProductCategory) => (
                 <option key={data.id} value={data.id}>
                   {data.name} - {data.code}
                 </option>
@@ -74,7 +76,37 @@ export const ProductForm = ({
             label="Add Category"
             className="text-nowrap h-fit w-fit"
             size="sm"
-            href="/category"
+            href="/product-category"
+          />
+        )}
+      </div>
+      <div className="space-y-3">
+        <div className="w-full">
+          <label className="font-semibold text-sm block mb-2">
+            Base Unit Product
+          </label>
+          <select
+            value={form.baseUnitId as string}
+            onChange={onChange}
+            disabled={type === "detail"}
+            name="baseUnitId"
+            className="px-3 py-2.5 w-full border border-black/30 rounded-lg focus:outline-black"
+          >
+            <option value="">Select unit</option>
+            {unit &&
+              unit.map((data: Unit) => (
+                <option key={data.id} value={data.id}>
+                  {data.name} - {data.code}
+                </option>
+              ))}
+          </select>
+        </div>
+        {type !== "detail" && (
+          <BaseButton
+            label="Add Unit"
+            className="text-nowrap h-fit w-fit"
+            size="sm"
+            href="/unit"
           />
         )}
       </div>

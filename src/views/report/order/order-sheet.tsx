@@ -5,13 +5,13 @@ import { useState, type ReactNode } from "react";
 
 interface ReportOrderSheetProps {
   reportOrderData?: ReportOrder;
-  loadData: () => void;
+  // loadData: () => void;
   trigger?: ReactNode;
 }
 
 export const ReportOrderSheet = ({
   reportOrderData,
-  loadData,
+  // loadData,
   trigger,
 }: ReportOrderSheetProps) => {
   const { formatMoney } = useFormatter();
@@ -28,37 +28,40 @@ export const ReportOrderSheet = ({
           ...prev,
           show: isOpen,
         }));
-        loadData();
+        // loadData();
       }}
       trigger={trigger}
       headerTitle={`Detail Order ${reportOrderData?.id}`}
     >
       <div className="space-y-6 p-4 relative overflow-y-auto">
         <div className="border-b space-y-4 pb-4">
-          <h1 className="text-xl font-semibold">Client Data</h1>
+          <h1 className="text-xl font-semibold">Customer Data</h1>
           <div>
             <label className="font-semibold text-sm block mb-2">
-              Client Name
+              Customer Name
             </label>
-            <p>{reportOrderData?.client.name || "-"}</p>
+            <p>{reportOrderData?.customer.name || "-"}</p>
           </div>
           <div>
             <label className="font-semibold text-sm block mb-2">
-              Client Phone Number
+              Customer Phone Number
             </label>
-            <p>{reportOrderData?.client.phoneNumber || "-"}</p>
+            <p>{reportOrderData?.customer.phoneNumber || "-"}</p>
           </div>
           <div>
             <label className="font-semibold text-sm block mb-2">
-              Client Address
+              Customer Address
             </label>
-            <p>{reportOrderData?.client.address || "-"}</p>
+            <p>{reportOrderData?.customer.address || "-"}</p>
           </div>
         </div>
         <div className="border-b space-y-4 pb-4">
           <h1 className="text-xl font-semibold">Order Data</h1>
           {reportOrderData?.orderItems.map((order) => (
-            <div key={order.id} className="flex gap-2 justify-between items-end">
+            <div
+              key={order.id}
+              className="flex gap-2 justify-between items-end"
+            >
               <div>
                 <label className="font-semibold text-sm block mb-2">
                   {order.name}
@@ -71,9 +74,7 @@ export const ReportOrderSheet = ({
             </div>
           ))}
           <div className="flex gap-2 justify-between items-center">
-            <label className="font-semibold text-sm block">
-              Total Amount
-            </label>
+            <label className="font-semibold text-sm block">Total Amount</label>
             <p>{formatMoney(reportOrderData?.totalAmount)}</p>
           </div>
         </div>

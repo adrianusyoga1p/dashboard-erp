@@ -21,6 +21,7 @@ export const UserTable = () => {
     keyword: null,
   });
   const [totalPage, setTotalPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const onPageChange = (page: number) => {
     setParams((prev) => ({
@@ -31,6 +32,7 @@ export const UserTable = () => {
 
   const loadUser = useCallback(
     async (keyword?: string | null) => {
+      setLoading(true);
       const { data, error } = await apiGetListUser({
         ...params,
         keyword,
@@ -41,6 +43,7 @@ export const UserTable = () => {
           setTotalPage(data.meta.totalPage ?? 1);
         }
       }
+      setLoading(false);
     },
     [params.page, params.limit, params.order, params.orderBy]
   );
@@ -64,12 +67,9 @@ export const UserTable = () => {
   const userTableSlots = {
     actions: (user: User) => (
       <div className="flex items-center justify-center gap-2">
-        {canAccess("division_read") && (
+        {canAccess("user_read") && (
           <UserSheet
-            userData={user}
-            loadData={() => {
-              loadUser(null);
-            }}
+            id={user.id}
             trigger={
               <div>
                 <BaseTooltip
@@ -79,7 +79,7 @@ export const UserTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Detail User</p>
+                  <p>Detail</p>
                 </BaseTooltip>
               </div>
             }
@@ -124,6 +124,8 @@ export const UserTable = () => {
         limit={params.limit || 10}
         onPageChange={onPageChange}
         slot={userTableSlots}
+        noDataText="Data user is empty"
+        loading={loading}
       />
     </div>
   );

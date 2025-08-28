@@ -102,11 +102,11 @@ export const DivisionSheet = ({
       loading: true,
       show: true,
     }));
-    const { data, error } =
+    const { error } =
       type === "add"
         ? await apiCreateDivision(form)
         : await apiUpdateDivision(divisionData?.id as string, form);
-    if (data) {
+    if (!error) {
       resetForm();
       loadData();
       setSubmitStatus({
@@ -114,8 +114,8 @@ export const DivisionSheet = ({
         type: "success",
         message: "Your data is saved!",
       });
-      setState((prev) => ({
-        ...prev,
+      setState(() => ({
+        loading: false,
         show: false,
       }));
     } else {
@@ -124,11 +124,11 @@ export const DivisionSheet = ({
         type: "error",
         message: error?.message || "",
       });
+      setState(() => ({
+        loading: false,
+        show: true,
+      }));
     }
-    setState((prev) => ({
-      ...prev,
-      loading: false,
-    }));
   };
 
   useEffect(() => {
@@ -152,6 +152,36 @@ export const DivisionSheet = ({
       >
         OK
       </BaseButton>
+    );
+  };
+
+  const SheetFooter = () => {
+    return (
+      <div className="flex gap-4 items-center w-full">
+        <BaseButton
+          onClick={() => {
+            setState((prev) => ({
+              ...prev,
+              show: false,
+            }));
+            if (type === "add") {
+              resetForm();
+            }
+          }}
+          className="w-full"
+          model="transparent"
+          disabled={state.loading}
+        >
+          Discard
+        </BaseButton>
+        <BaseButton
+          className="w-full"
+          disabled={state.loading}
+          onClick={submitDivision}
+        >
+          {state.loading ? "Loading..." : "Submit"}
+        </BaseButton>
+      </div>
     );
   };
   return (
@@ -184,17 +214,7 @@ export const DivisionSheet = ({
             ? `Edit Division ${divisionData?.displayName}`
             : `Division ${divisionData?.displayName}`
         }
-        footer={
-          type !== "detail" && (
-            <BaseButton disabled={state.loading} onClick={submitDivision}>
-              {state.loading
-                ? "Loading..."
-                : type === "add"
-                ? "Add Division"
-                : "Update Division"}
-            </BaseButton>
-          )
-        }
+        footer={type !== "detail" && <SheetFooter />}
       >
         <DivisionForm
           type={type}

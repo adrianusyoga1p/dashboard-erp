@@ -1,8 +1,6 @@
 import { apiGetListReportOrder } from "@/api/endpoints/report";
 import { BaseInput } from "@/components/base/input";
 import BaseTable from "@/components/base/table";
-// import { useMoney } from "@/hooks/useMoney";
-// import { useRole } from "@/hooks/useRole";
 import type { BaseParam } from "@/types/common";
 import type { ReportOrder } from "@/types/report";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
@@ -11,17 +9,7 @@ import { BaseTooltip } from "@/components/base/tooltip";
 import { BaseButton } from "@/components/base/button";
 import { LuEye } from "react-icons/lu";
 
-// const OrderItem = ({ order }: { order: ReportOrder["orderItems"][number] }) => {
-//   const price = useMoney(order.price);
-//   return (
-//     <p>
-//       {order.productSku} ({price})
-//     </p>
-//   );
-// };
-
 export const ReportOrderTable = () => {
-  // const { canAccess } = useRole();
   const [dataOrder, setDataOrder] = useState<ReportOrder[]>([]);
   const [params, setParams] = useState<BaseParam<ReportOrder>>({
     page: 1,
@@ -71,14 +59,18 @@ export const ReportOrderTable = () => {
     [params.keyword, loadReportOrder]
   );
 
+  // const loadDetailOrder = useCallback(async (id: string) => {
+  //   const { data } = await apiGetDetailReportOrder(id);
+  //   if (data) {
+  //     setDataOrder(data)
+  //   }
+  // });
+
   const reportOrderTableSlots = {
     actions: (reportOrder: ReportOrder) => (
       <div className="flex items-center justify-center gap-2">
         <ReportOrderSheet
           reportOrderData={reportOrder}
-          loadData={() => {
-            loadReportOrder(null);
-          }}
           trigger={
             <div>
               <BaseTooltip
@@ -95,13 +87,6 @@ export const ReportOrderTable = () => {
         />
       </div>
     ),
-    // orderItems: (reportOrder: ReportOrder) => (
-    //   <div className="flex items-center justify-center gap-2">
-    //     {reportOrder.orderItems.map((order) => (
-    //       <OrderItem key={order.id} order={order} />
-    //     ))}
-    //   </div>
-    // ),
   };
 
   return (
@@ -123,14 +108,14 @@ export const ReportOrderTable = () => {
         columns={[
           { title: "#", key: "id", type: "increment" },
           { title: "Actions", key: "actions", type: "slot" },
-          // { title: "Order Items", key: "orderItems", type: "slot" },
-          { title: "Order ID", key: "id", className: 'text-nowrap' },
-          { title: "Total Amount", key: "totalAmount", type: 'price' },
-          { title: "Status", key: "status", className: 'capitalize' },
-          { title: "Type Order", key: "typeOrder", className: 'capitalize' },
-          { title: "New Order", key: "isNewOrder", type: 'boolean' },
+          { title: "Order ID", key: "id", className: "text-nowrap" },
+          { title: "Total Amount", key: "totalAmount", type: "price" },
+          { title: "Status", key: "status", className: "capitalize" },
+          { title: "Type Order", key: "typeOrder", className: "capitalize" },
+          { title: "New Order", key: "isNewOrder", type: "boolean" },
           { title: "Description", key: "description" },
           { title: "Purchased At", key: "purchasedAt", type: "datetime" },
+          { title: "Created At", key: "createdAt", type: "datetime" },
         ]}
         source={dataOrder}
         page={params.page || 1}
@@ -138,6 +123,7 @@ export const ReportOrderTable = () => {
         limit={params.limit || 10}
         onPageChange={onPageChange}
         slot={reportOrderTableSlots}
+        noDataText="Data order is empty"
       />
     </div>
   );

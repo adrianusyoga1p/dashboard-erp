@@ -1,14 +1,14 @@
 import { BaseInput } from "@/components/base/input";
 import { BaseMaps } from "@/components/base/maps";
 import { BaseTextarea } from "@/components/base/textarea";
-import type { ClientPayload } from "@/types/client";
+import type { CustomerPayload } from "@/types/customer";
 import { useEffect, type ChangeEvent } from "react";
 import { Popup } from "react-leaflet";
 import { useMap } from "react-leaflet";
 
-interface ClientFormContentProps {
-  form: ClientPayload;
-  setForm: React.Dispatch<React.SetStateAction<ClientPayload>>;
+interface CustomerFormContentProps {
+  form: CustomerPayload;
+  setForm: React.Dispatch<React.SetStateAction<CustomerPayload>>;
   type: "add" | "edit" | "detail";
 }
 
@@ -26,11 +26,11 @@ const DisableInteraction = () => {
   return null;
 };
 
-export const ClientForm = ({
+export const CustomerForm = ({
   form,
   setForm,
   type = "add",
-}: ClientFormContentProps) => {
+}: CustomerFormContentProps) => {
   const onChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
@@ -71,8 +71,8 @@ export const ClientForm = ({
     <div className="space-y-6 p-4 relative overflow-y-auto">
       <BaseInput
         type="text"
-        placeholder="Input client name"
-        label="Client Name"
+        placeholder="Input customer name"
+        label="Customer Name"
         onChange={onChange}
         name="name"
         value={form.name as string}
@@ -80,8 +80,8 @@ export const ClientForm = ({
       />
       <BaseInput
         type="text"
-        placeholder="Input client store name"
-        label="Client Store Name"
+        placeholder="Input customer store name"
+        label="Customer Store Name"
         onChange={onChange}
         name="storeName"
         value={form.storeName as string}
@@ -89,8 +89,8 @@ export const ClientForm = ({
       />
       <BaseInput
         type="email"
-        placeholder="Input client email"
-        label="Client Email"
+        placeholder="Input customer email"
+        label="Customer Email"
         onChange={onChange}
         name="email"
         value={form.email as string}
@@ -98,16 +98,16 @@ export const ClientForm = ({
       />
       <BaseInput
         type="text"
-        placeholder="Input client phonenumber"
-        label="Client Phone Number"
+        placeholder="Input customer phonenumber"
+        label="Customer Phone Number"
         onChange={onChange}
         name="phoneNumber"
         value={form.phoneNumber as string}
         disabled={type == "detail"}
       />
       <BaseTextarea
-        placeholder="Input client address"
-        label="Client Address"
+        placeholder="Input customer address"
+        label="Customer Address"
         onChange={onChange}
         name="address"
         value={form.address as string}
@@ -115,8 +115,8 @@ export const ClientForm = ({
       />
       <BaseInput
         type="text"
-        placeholder="Input client latitude"
-        label="Client Latitude"
+        placeholder="Input customer latitude"
+        label="Customer Latitude"
         onChange={onChange}
         name="latitude"
         value={Number(form.latitude).toFixed(6)}
@@ -124,8 +124,8 @@ export const ClientForm = ({
       />
       <BaseInput
         type="text"
-        placeholder="Input client longitude"
-        label="Client Longitude"
+        placeholder="Input customer longitude"
+        label="Customer Longitude"
         onChange={onChange}
         name="longitude"
         value={Number(form.longitude).toFixed(6)}

@@ -41,6 +41,10 @@ export const AdminTable = () => {
 
   const loadAdmins = useCallback(
     async (keyword?: string | null) => {
+      setAlertState((prev) => ({
+        ...prev,
+        loading: true,
+      }));
       const { data, error } = await apiGetListAdmin({
         ...params,
         keyword,
@@ -51,6 +55,10 @@ export const AdminTable = () => {
           setTotalPage(data.meta.totalPage ?? 1);
         }
       }
+      setAlertState((prev) => ({
+        ...prev,
+        loading: false,
+      }));
     },
     [params.page, params.limit, params.order, params.orderBy]
   );
@@ -88,7 +96,7 @@ export const AdminTable = () => {
             type="detail"
             adminData={admin}
             loadData={() => {
-              loadAdmins("");
+              loadAdmins();
             }}
             trigger={
               <div>
@@ -99,7 +107,7 @@ export const AdminTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Detail Admin</p>
+                  <p>Detail</p>
                 </BaseTooltip>
               </div>
             }
@@ -111,7 +119,7 @@ export const AdminTable = () => {
             type="edit"
             adminData={admin}
             loadData={() => {
-              loadAdmins("");
+              loadAdmins();
             }}
             trigger={
               <div>
@@ -122,7 +130,7 @@ export const AdminTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Edit Admin</p>
+                  <p>Edit</p>
                 </BaseTooltip>
               </div>
             }
@@ -142,7 +150,7 @@ export const AdminTable = () => {
               </BaseButton>
             }
           >
-            <p>Delete Admin</p>
+            <p>Delete</p>
           </BaseTooltip>
         )}
       </div>
@@ -254,6 +262,8 @@ export const AdminTable = () => {
           total={totalPage}
           limit={params.limit || 10}
           onPageChange={onPageChange}
+          noDataText="Data admin is empty"
+          loading={alertState.loading}
         />
       </div>
     </>

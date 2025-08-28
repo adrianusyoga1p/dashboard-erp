@@ -1,23 +1,23 @@
-import { apiDeleteProduct, apiGetListProduct } from "@/api/endpoints/product";
+import { useRole } from "@/hooks/useRole";
+import type { Customer } from "@/types/customer";
+import type { BaseParam } from "@/types/common";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { CustomerSheet } from "./customer-sheet";
 import { BaseButton } from "@/components/base/button";
 import { BaseInput } from "@/components/base/input";
-import BaseTable from "@/components/base/table";
-import type { Product } from "@/types/product";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { LuEye, LuPencil, LuTrash } from "react-icons/lu";
+import {
+  apiDeleteCustomer,
+  apiGetListCustomer,
+} from "@/api/endpoints/customer";
 import { BaseTooltip } from "@/components/base/tooltip";
-import { ProductSheet } from "./product-sheet";
+import { LuEye, LuPencil, LuTrash } from "react-icons/lu";
 import BaseAlert from "@/components/base/alert";
-import type { BaseParam } from "@/types/common";
-import { useRole } from "@/hooks/useRole";
-import { socket } from "@/socket";
-import { ProductModal } from "./product-modal";
+import BaseTable from "@/components/base/table";
 
-export const ProductTable = () => {
+export const CustomerTable = () => {
   const { canAccess } = useRole();
-  const [lowStockIds, setLowStockIds] = useState<Set<string>>(new Set());
-  const [products, setProducts] = useState<Product[]>([]);
-  const [params, setParams] = useState<BaseParam<Product>>({
+  const [customer, setCustomer] = useState<Customer[]>([]);
+  const [params, setParams] = useState<BaseParam<Customer>>({
     page: 1,
     limit: 10,
     order: "desc",
@@ -42,18 +42,18 @@ export const ProductTable = () => {
     }));
   };
 
-  const loadProducts = useCallback(
+  const loadCustomer = useCallback(
     async (keyword?: string | null) => {
       setAlertState((prev) => ({
         ...prev,
         loading: true,
       }));
-      const { data, error } = await apiGetListProduct({
+      const { data, error } = await apiGetListCustomer({
         ...params,
         keyword,
       });
       if (!error && data.data) {
-        setProducts(data.data);
+        setCustomer(data.data);
         if (data.meta) {
           setTotalPage(data.meta.totalPage ?? 1);
         }
@@ -66,22 +66,22 @@ export const ProductTable = () => {
     [params.page, params.limit, params.order, params.orderBy]
   );
 
-  const deleteProduct = async (id: string) => {
+  const deleteCustomer = async (id: string) => {
     setAlertState({
       isOpen: true,
       type: "warning",
       title: "Delete Confirmation",
-      message: "Are you sure you want to delete this product?",
+      message: "Are you sure you want to delete this data?",
       onConfirm: async () => {
-        const { data, error } = await apiDeleteProduct(id);
+        const { data, error } = await apiDeleteCustomer(id);
         setAlertState({
           isOpen: true,
           type: data ? "success" : "error",
           title: data ? "Success" : "Error",
           message: data
-            ? "Product deleted successfully!"
-            : error?.message || "Failed to delete product",
-          onConfirm: () => loadProducts(),
+            ? "Data deleted successfully!"
+            : error?.message || "Failed to delete data customer",
+          onConfirm: () => loadCustomer(),
           showCancel: false,
           loading: data || error ? false : true,
         });
@@ -91,15 +91,15 @@ export const ProductTable = () => {
     });
   };
 
-  const productTableSlots = {
-    actions: (product: Product) => (
+  const customerTableSlots = {
+    actions: (customer: Customer) => (
       <div className="flex items-center justify-center gap-2">
-        {canAccess("product_read") && (
-          <ProductSheet
+        {canAccess("customer_read") && (
+          <CustomerSheet
             type="detail"
-            productData={product}
+            customerData={customer}
             loadData={() => {
-              loadProducts();
+              loadCustomer();
             }}
             trigger={
               <div>
@@ -117,12 +117,12 @@ export const ProductTable = () => {
           />
         )}
 
-        {canAccess("product_update") && (
-          <ProductSheet
+        {canAccess("customer_update") && (
+          <CustomerSheet
             type="edit"
-            productData={product}
+            customerData={customer}
             loadData={() => {
-              loadProducts();
+              loadCustomer();
             }}
             trigger={
               <div>
@@ -140,14 +140,14 @@ export const ProductTable = () => {
           />
         )}
 
-        {canAccess("product_delete") && (
+        {canAccess("customer_delete") && (
           <BaseTooltip
             trigger={
               <BaseButton
                 model="outline"
                 size="sm"
                 className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
-                onClick={() => deleteProduct(product.id)}
+                onClick={() => deleteCustomer(customer.id)}
               >
                 <LuTrash />
               </BaseButton>
@@ -158,43 +158,22 @@ export const ProductTable = () => {
         )}
       </div>
     ),
-    name: (product: Product) => (
-      <>
-        {lowStockIds.has(product.id) && (
-          <span className="absolute left-2 top-2 w-3 h-3 bg-red-500 rounded-full animate-ping" />
-        )}
-        {product.name}
-      </>
-    ),
   };
 
   useEffect(() => {
-    loadProducts(params.keyword);
-  }, [loadProducts]);
-
-  useEffect(() => {
-    const handleStockMinimum = (products: Product[]) => {
-      const ids = new Set(products.map((p) => p.id));
-      setLowStockIds(ids);
-    };
-
-    socket.on("stock_minimum", handleStockMinimum);
-
-    return () => {
-      socket.off("stock_minimum", handleStockMinimum);
-    };
-  }, []);
+    loadCustomer(params.keyword);
+  }, [loadCustomer]);
 
   const handleSearch = useCallback(
     (e?: FormEvent) => {
       e?.preventDefault();
-      loadProducts(params.keyword);
+      loadCustomer(params.keyword);
       setParams((prev) => ({
         ...prev,
         page: 1,
       }));
     },
-    [params.keyword, loadProducts]
+    [params.keyword, loadCustomer]
   );
 
   const AlertFooter = () => {
@@ -255,48 +234,35 @@ export const ProductTable = () => {
               placeholder="Search keyword..."
             />
           </form>
-          {canAccess("product_create") && (
-            <div className="flex gap-4 items-center">
-              <ProductModal
-                loadData={loadProducts}
-                trigger={<BaseButton model="outline">Import Data</BaseButton>}
-              />
-              <ProductSheet
-                type="add"
-                loadData={() => {
-                  loadProducts();
-                  params.keyword = null;
-                }}
-                trigger={<BaseButton>Add Product</BaseButton>}
-              />
-            </div>
+          {canAccess("customer_create") && (
+            <CustomerSheet
+              type="add"
+              loadData={() => {
+                loadCustomer();
+                params.keyword = null;
+              }}
+              trigger={<BaseButton>Add Customer</BaseButton>}
+            />
           )}
         </div>
-        <BaseTable<Product>
+        <BaseTable<Customer>
           columns={[
             { title: "#", key: "id", type: "increment" },
             { title: "Actions", key: "actions", type: "slot" },
-            { title: "Name", key: "name", type: "slot", className: "relative" },
-            { title: "Product SKU", key: "productSku" },
-            { title: "Qty", key: "currentQty" },
-            {
-              title: "Minimum Stock",
-              key: "minimumStock",
-            },
-            { title: "Base Unit", key: "baseUnit.name" },
-            { title: "Brand Name", key: "brandName" },
-            { title: "Active", key: "active", type: "boolean" },
-            { title: "Product Category", key: "productCategory.name" },
-            { title: "Price", key: "price", type: "price" },
+            { title: "Customer Name", key: "name" },
+            { title: "Store Name", key: "storeName" },
+            { title: "Email", key: "email" },
+            { title: "Phone Number", key: "phoneNumber" },
+            { title: "Address", key: "address" },
             { title: "Created At", key: "createdAt", type: "datetime" },
           ]}
-          source={products}
+          source={customer}
           page={params.page || 1}
-          slot={productTableSlots}
+          slot={customerTableSlots}
           total={totalPage}
           limit={params.limit || 10}
           onPageChange={onPageChange}
-          noDataText="Data product is empty"
+          noDataText="Data customer is empty"
           loading={alertState.loading}
         />
       </div>

@@ -67,87 +67,47 @@ export const DivisionForm = ({
       />
       <div>
         <label className="font-semibold text-sm block mb-2">Access</label>
-        <div className="space-y-4">
-          {Object.entries(grouped).map(([resource, accesses]) => {
-            const allChecked = accesses.every((access) =>
-              form.accesses?.some((a) => a.accessId === access.id)
-            );
+        {access && access.length ? (
+          <div className="space-y-4">
+            {Object.entries(grouped).map(([resource, accesses]) => {
+              const allChecked = accesses.every((access) =>
+                form.accesses?.some((a) => a.accessId === access.id)
+              );
 
-            return (
-              <div key={resource} className="border p-4 rounded-md shadow">
-                <div className="flex gap-2 items-center justify-between">
-                  <h2 className="text-lg font-bold capitalize mb-2">
-                    {resource.replace(/_/g, " ")}
-                  </h2>
-                  <BaseCheckbox
-                    label="Select All"
-                    disabled={type == "detail"}
-                    checked={allChecked}
-                    onCheckedChange={(checked: boolean) => {
-                      setForm((prev) => {
-                        const currentAccesses = prev.accesses || [];
-
-                        const resourceAccessIds = accesses.map((a) => a.id);
-
-                        let updatedAccesses: { accessId: string }[] = [];
-
-                        if (checked) {
-                          const merged = [
-                            ...currentAccesses,
-                            ...resourceAccessIds
-                              .filter(
-                                (id) =>
-                                  !currentAccesses.some(
-                                    (a) => a.accessId === id
-                                  )
-                              )
-                              .map((id) => ({ accessId: id })),
-                          ];
-                          updatedAccesses = merged;
-                        } else {
-                          updatedAccesses = currentAccesses.filter(
-                            (a) => !resourceAccessIds.includes(a.accessId)
-                          );
-                        }
-
-                        return {
-                          ...prev,
-                          accesses:
-                            updatedAccesses.length > 0 ? updatedAccesses : null,
-                        };
-                      });
-                    }}
-                  />
-                </div>
-                <div className="space-y-1">
-                  {accesses.map((access) => (
+              return (
+                <div key={resource} className="border p-4 rounded-md shadow">
+                  <div className="flex gap-2 items-center justify-between">
+                    <h2 className="text-lg font-bold capitalize mb-2">
+                      {resource.replace(/_/g, " ")}
+                    </h2>
                     <BaseCheckbox
-                      key={access.id}
+                      label="Select All"
                       disabled={type == "detail"}
-                      label={access.action}
-                      checked={form.accesses?.some(
-                        (a) => a.accessId === access.id
-                      )}
+                      checked={allChecked}
                       onCheckedChange={(checked: boolean) => {
                         setForm((prev) => {
-                          let updatedAccesses: { accessId: string }[] =
-                            prev.accesses || [];
+                          const currentAccesses = prev.accesses || [];
+
+                          const resourceAccessIds = accesses.map((a) => a.id);
+
+                          let updatedAccesses: { accessId: string }[] = [];
 
                           if (checked) {
-                            if (
-                              !updatedAccesses.some(
-                                (a) => a.accessId === access.id
-                              )
-                            ) {
-                              updatedAccesses = [
-                                ...updatedAccesses,
-                                { accessId: access.id },
-                              ];
-                            }
+                            const merged = [
+                              ...currentAccesses,
+                              ...resourceAccessIds
+                                .filter(
+                                  (id) =>
+                                    !currentAccesses.some(
+                                      (a) => a.accessId === id
+                                    )
+                                )
+                                .map((id) => ({ accessId: id })),
+                            ];
+                            updatedAccesses = merged;
                           } else {
-                            // Remove access
-                            updatedAccesses = updatedAccesses.filter(
-                              (a) => a.accessId !== access.id
+                            updatedAccesses = currentAccesses.filter(
+                              (a) => !resourceAccessIds.includes(a.accessId)
                             );
                           }
 
@@ -161,12 +121,58 @@ export const DivisionForm = ({
                         });
                       }}
                     />
-                  ))}
+                  </div>
+                  <div className="space-y-1">
+                    {accesses.map((access) => (
+                      <BaseCheckbox
+                        key={access.id}
+                        disabled={type == "detail"}
+                        label={access.action}
+                        checked={form.accesses?.some(
+                          (a) => a.accessId === access.id
+                        )}
+                        onCheckedChange={(checked: boolean) => {
+                          setForm((prev) => {
+                            let updatedAccesses: { accessId: string }[] =
+                              prev.accesses || [];
+
+                            if (checked) {
+                              if (
+                                !updatedAccesses.some(
+                                  (a) => a.accessId === access.id
+                                )
+                              ) {
+                                updatedAccesses = [
+                                  ...updatedAccesses,
+                                  { accessId: access.id },
+                                ];
+                              }
+                            } else {
+                              // Remove access
+                              updatedAccesses = updatedAccesses.filter(
+                                (a) => a.accessId !== access.id
+                              );
+                            }
+
+                            return {
+                              ...prev,
+                              accesses:
+                                updatedAccesses.length > 0
+                                  ? updatedAccesses
+                                  : null,
+                            };
+                          });
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        ) : (
+          "No data accesses"
+        )}
       </div>
     </div>
   );

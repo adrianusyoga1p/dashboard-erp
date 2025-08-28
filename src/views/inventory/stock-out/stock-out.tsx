@@ -1,24 +1,23 @@
-import { apiCreateStockIn, apiGetListStockIn } from "@/api/endpoints/stock";
+import { apiCreateStockOut, apiGetListStockOut } from "@/api/endpoints/stock";
 import { BaseButton } from "@/components/base/button";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { StockInForm } from "./stock-in-form";
+import { StockOutForm } from "./stock-out-form";
 import type { Stocks, StocksPayload } from "@/types/stock";
 import BaseAlert from "@/components/base/alert";
-import { StockInTable } from "./stock-in-table";
+import { StockOutTable } from "./stock-out-table";
 import type { BaseParam } from "@/types/common";
 import { BaseInput } from "@/components/base/input";
 import { useRole } from "@/hooks/useRole";
 import { LayoutStock } from "@/components/layout/stock";
 
-const StockInPage = () => {
+const StockOutPage = () => {
   const { canAccess } = useRole();
   const [state, setState] = useState({
     loading: false,
   });
 
-  const [form, setForm] = useState<StocksPayload>({
+  const [form, setForm] = useState<Omit<StocksPayload, "minimumStock">>({
     qty: null,
-    minimumStock: null,
     productId: "",
     reason: "",
   });
@@ -36,7 +35,6 @@ const StockInPage = () => {
   const resetForm = () => {
     setForm({
       qty: null,
-      minimumStock: null,
       productId: "",
       reason: "",
     });
@@ -46,10 +44,9 @@ const StockInPage = () => {
     setState(() => ({
       loading: true,
     }));
-    const { error } = await apiCreateStockIn({
+    const { error } = await apiCreateStockOut({
       ...form,
       qty: Number(form.qty),
-      minimumStock: Number(form.minimumStock),
     });
     if (!error) {
       resetForm();
@@ -108,7 +105,7 @@ const StockInPage = () => {
       setState(() => ({
         loading: true,
       }));
-      const { data, error } = await apiGetListStockIn({
+      const { data, error } = await apiGetListStockOut({
         ...params,
         keyword,
       });
@@ -142,9 +139,7 @@ const StockInPage = () => {
   );
 
   const isFormEmpty = (): boolean => {
-    return (
-      form.qty === null || form.minimumStock === null || form.productId === ""
-    );
+    return form.qty === null || form.productId === "";
   };
 
   return (
@@ -160,12 +155,14 @@ const StockInPage = () => {
         footerSlot={<AlertFooter />}
       />
 
-      {canAccess("stock_in_create") && (
+      {canAccess("stock_out_create") && (
         <>
           <div className="flex gap-4 items-center justify-between">
-            <h1 className="font-semibold text-lg">Stock In Management</h1>
+            <h1 className="font-semibold text-lg">Stock Out Management</h1>
             <div className="flex gap-4 items-center">
-              <BaseButton model="transparent" onClick={resetForm}>Discard</BaseButton>
+              <BaseButton model="transparent" onClick={resetForm}>
+                Discard
+              </BaseButton>
               <BaseButton
                 disabled={state.loading || isFormEmpty()}
                 onClick={submitStockIn}
@@ -174,11 +171,11 @@ const StockInPage = () => {
               </BaseButton>
             </div>
           </div>
-          <StockInForm form={form} setForm={setForm} />
+          <StockOutForm form={form} setForm={setForm} />
         </>
       )}
       <div className="space-y-4">
-        <h1 className="font-semibold text-lg">Stock In Table</h1>
+        <h1 className="font-semibold text-lg">Stock Out Table</h1>
         <form onSubmit={handleSearch}>
           <BaseInput
             className="w-fit min-w-60"
@@ -192,7 +189,7 @@ const StockInPage = () => {
             placeholder="Search keyword..."
           />
         </form>
-        <StockInTable
+        <StockOutTable
           data={dataStock}
           page={params.page || 1}
           totalPage={totalPage}
@@ -205,4 +202,4 @@ const StockInPage = () => {
   );
 };
 
-export default StockInPage;
+export default StockOutPage;

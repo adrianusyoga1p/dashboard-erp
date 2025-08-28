@@ -7,12 +7,14 @@ import type { StocksPayload } from "@/types/stock";
 import { useEffect, useState, type ChangeEvent } from "react";
 import { LuPlus } from "react-icons/lu";
 
-interface StockInFormProps {
-  form: StocksPayload;
-  setForm: React.Dispatch<React.SetStateAction<StocksPayload>>;
+interface StockOutFormProps {
+  form: Omit<StocksPayload, "minimumStock">;
+  setForm: React.Dispatch<
+    React.SetStateAction<Omit<StocksPayload, "minimumStock">>
+  >;
 }
 
-export const StockInForm = ({ form, setForm }: StockInFormProps) => {
+export const StockOutForm = ({ form, setForm }: StockOutFormProps) => {
   const [product, setProduct] = useState<Product[]>([]);
   const loadProduct = async (page = 1) => {
     let allData: Product[] = [];
@@ -40,17 +42,10 @@ export const StockInForm = ({ form, setForm }: StockInFormProps) => {
   const onChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type } = e.target;
-
-    let newValue: string | number | boolean = value;
-
-    if (type === "number") {
-      newValue = value === "" ? "" : Number(value);
-    }
-
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: newValue,
+      [name]: value,
     }));
   };
 
@@ -58,39 +53,19 @@ export const StockInForm = ({ form, setForm }: StockInFormProps) => {
     <div className="grid sm:grid-cols-2 gap-6">
       <BaseInput
         type="number"
-        placeholder="Input stock qty"
+        placeholder="Input stock out qty"
         label="Stock Product Qty"
         onChange={onChange}
         name="qty"
         value={form.qty as number}
       />
-      <BaseInput
-        type="number"
-        placeholder="Input product min qty"
-        label="Product Min Qty"
-        name="minimumStock"
-        onChange={onChange}
-        value={form.minimumStock as number}
-      />
-
       <div className="space-y-3">
         <div className="w-full">
           <label className="font-semibold text-sm block mb-2">Product</label>
           <div className="flex gap-4 items-center">
             <select
               value={form.productId as string}
-              onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                const selectedProductId = e.target.value;
-                const selectedProduct = product.find(
-                  (p) => p.id === selectedProductId
-                );
-
-                setForm({
-                  ...form,
-                  productId: selectedProductId,
-                  minimumStock: selectedProduct?.minimumStock || null,
-                });
-              }}
+              onChange={onChange}
               className="px-3 py-2.5 h-10 w-full border border-black/30 rounded-lg focus:outline-black"
             >
               <option value="">Select product</option>
@@ -115,7 +90,7 @@ export const StockInForm = ({ form, setForm }: StockInFormProps) => {
         </div>
       </div>
       <BaseInput
-        placeholder="Input stock in reason"
+        placeholder="Input stock out reason"
         label="Reason"
         name="reason"
         onChange={onChange}

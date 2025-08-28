@@ -1,28 +1,28 @@
 import {
-  apiCreateSales,
-  apiGetDetailSales,
-  apiUpdateSales,
-} from "@/api/endpoints/sales";
+  apiCreateUnitCategory,
+  apiGetDetailUnitCategory,
+  apiUpdateUnitCategory,
+} from "@/api/endpoints/category";
+import { BaseSheet } from "@/components/base/sheet";
+import { useCallback, useEffect, useState } from "react";
+import { UnitCategoryForm } from "./unit-category-form";
 import BaseAlert from "@/components/base/alert";
 import { BaseButton } from "@/components/base/button";
-import type { Sales, SalesPayload } from "@/types/sales";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { SalesForm } from "./sales-form";
-import { BaseSheet } from "@/components/base/sheet";
+import type { UnitCategory } from "@/types/unit";
 
-interface SalesSheetProps {
+interface UnitCategorySheetProps {
   type?: "add" | "edit" | "detail";
-  salesData?: Sales;
+  unitCategoryData?: UnitCategory;
   loadData: () => void;
-  trigger?: ReactNode;
+  trigger?: React.ReactNode;
 }
 
-export const SalesSheet = ({
+export const UnitCategorySheet = ({
   type = "add",
-  salesData,
+  unitCategoryData,
   loadData,
   trigger,
-}: SalesSheetProps) => {
+}: UnitCategorySheetProps) => {
   const [state, setState] = useState({
     loading: false,
     show: false,
@@ -38,67 +38,34 @@ export const SalesSheet = ({
     message: "",
   });
 
-  const [form, setForm] = useState<SalesPayload>({
+  const [form, setForm] = useState({
     name: "",
-    pin: "",
-    email: "",
-    password: null,
-    gender: "male",
-    phoneNumber: "",
-    fullName: null,
-    birthDate: null,
-    birthPlace: null,
-    address: null,
-    active: true,
   });
 
   const resetForm = () => {
     setForm({
       name: "",
-      pin: "",
-      email: "",
-      password: null,
-      gender: "male",
-      phoneNumber: "",
-      fullName: null,
-      birthDate: null,
-      birthPlace: null,
-      address: null,
-      active: true,
     });
   };
 
-  const loadDetailSales = useCallback(async (id: string) => {
-    const { data } = await apiGetDetailSales(id);
+  const loadDetailUnitCategory = useCallback(async (id: string) => {
+    const { data } = await apiGetDetailUnitCategory(id);
     if (data) {
-      setForm((prev) => ({
-        ...prev,
-        name: data.name,
-        pin: data.pin,
-        email: data.user.email as string,
-        gender: data.user.gender,
-        phoneNumber: data.user.phoneNumber,
-        fullName: data.user.fullName,
-        birthDate: data.user.birthDate,
-        birthPlace: data.user.birthPlace,
-        address: data.user.address,
-        active: data.active,
-      }));
+      setForm({
+        name: data?.name,
+      });
     }
   }, []);
 
-  const submitSales = async () => {
+  const submitCategory = async () => {
     setState(() => ({
       loading: true,
       show: true,
     }));
     const { error } =
       type === "add"
-        ? await apiCreateSales(form)
-        : await apiUpdateSales(salesData?.id as string, {
-            ...form,
-            password: undefined,
-          });
+        ? await apiCreateUnitCategory(form)
+        : await apiUpdateUnitCategory(unitCategoryData?.id as string, form);
     if (!error) {
       resetForm();
       loadData();
@@ -126,11 +93,11 @@ export const SalesSheet = ({
 
   useEffect(() => {
     if (state.show) {
-      if (type !== "add" && salesData?.id) {
-        loadDetailSales(salesData.id);
+      if (type !== "add" && unitCategoryData?.id) {
+        loadDetailUnitCategory(unitCategoryData.id);
       }
     }
-  }, [type, state.show, loadDetailSales, salesData?.id]);
+  }, [type, state.show, loadDetailUnitCategory]);
 
   const AlertFooter = () => {
     return (
@@ -156,9 +123,7 @@ export const SalesSheet = ({
               ...prev,
               show: false,
             }));
-            if (type === "add") {
-              resetForm();
-            }
+            resetForm();
           }}
           className="w-full"
           model="transparent"
@@ -169,13 +134,14 @@ export const SalesSheet = ({
         <BaseButton
           className="w-full"
           disabled={state.loading}
-          onClick={submitSales}
+          onClick={submitCategory}
         >
           {state.loading ? "Loading..." : "Submit"}
         </BaseButton>
       </div>
     );
   };
+
   return (
     <>
       <BaseAlert
@@ -190,6 +156,7 @@ export const SalesSheet = ({
       />
 
       <BaseSheet
+        trigger={trigger}
         open={state.show}
         onOpenChange={(isOpen) => {
           setState((prev) => ({
@@ -198,17 +165,16 @@ export const SalesSheet = ({
           }));
           resetForm();
         }}
-        trigger={trigger}
         headerTitle={
           type === "add"
-            ? "Add Sales"
+            ? "Add Unit Category"
             : type === "edit"
-            ? `Edit Sales ${salesData?.name}`
-            : `Detail Sales ${salesData?.name}`
+            ? `Edit Unit Category ${unitCategoryData?.name}`
+            : `Detail Unit Category ${unitCategoryData?.name}`
         }
         footer={type !== "detail" && <SheetFooter />}
       >
-        <SalesForm type={type} form={form} setForm={setForm} />
+        <UnitCategoryForm type={type} form={form} setForm={setForm} />
       </BaseSheet>
     </>
   );

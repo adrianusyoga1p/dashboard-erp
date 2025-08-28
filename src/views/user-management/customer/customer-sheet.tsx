@@ -1,28 +1,28 @@
 import {
-  apiCreateClient,
-  apiGetDetailClient,
-  apiUpdateClient,
-} from "@/api/endpoints/client";
+  apiCreateCustomer,
+  apiGetDetailCustomer,
+  apiUpdateCustomer,
+} from "@/api/endpoints/customer";
 import BaseAlert from "@/components/base/alert";
 import { BaseButton } from "@/components/base/button";
 import { BaseSheet } from "@/components/base/sheet";
-import type { Client, ClientPayload } from "@/types/client";
+import type { Customer, CustomerPayload } from "@/types/customer";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { ClientForm } from "./client-form";
+import { CustomerForm } from "./customer-form";
 
-interface ClientSheetProps {
+interface CustomerSheetProps {
   type?: "add" | "edit" | "detail";
-  clientData?: Client;
+  customerData?: Customer;
   loadData: () => void;
   trigger?: ReactNode;
 }
 
-export const ClientSheet = ({
+export const CustomerSheet = ({
   type = "add",
-  clientData,
+  customerData,
   loadData,
   trigger,
-}: ClientSheetProps) => {
+}: CustomerSheetProps) => {
   const [state, setState] = useState({
     loading: false,
     show: false,
@@ -38,7 +38,7 @@ export const ClientSheet = ({
     message: "",
   });
 
-  const [form, setForm] = useState<ClientPayload>({
+  const [form, setForm] = useState<CustomerPayload>({
     name: "",
     storeName: "",
     address: "",
@@ -60,8 +60,8 @@ export const ClientSheet = ({
     });
   };
 
-  const loadDetailClient = useCallback(async (id: string) => {
-    const { data } = await apiGetDetailClient(id);
+  const loadDetailCustomer = useCallback(async (id: string) => {
+    const { data } = await apiGetDetailCustomer(id);
     if (data) {
       setForm((prev) => ({
         ...prev,
@@ -76,16 +76,16 @@ export const ClientSheet = ({
     }
   }, []);
 
-  const submitClient = async () => {
+  const submitCustomer = async () => {
     setState(() => ({
       loading: true,
       show: true,
     }));
-    const { data, error } =
+    const { error } =
       type === "add"
-        ? await apiCreateClient(form)
-        : await apiUpdateClient(clientData?.id as string, form);
-    if (data) {
+        ? await apiCreateCustomer(form)
+        : await apiUpdateCustomer(customerData?.id as string, form);
+    if (!error) {
       resetForm();
       loadData();
       setSubmitStatus({
@@ -93,8 +93,8 @@ export const ClientSheet = ({
         type: "success",
         message: "Your data is saved!",
       });
-      setState((prev) => ({
-        ...prev,
+      setState(() => ({
+        loading: false,
         show: false,
       }));
     } else {
@@ -103,20 +103,20 @@ export const ClientSheet = ({
         type: "error",
         message: error?.message || "",
       });
+      setState(() => ({
+        loading: false,
+        show: true,
+      }));
     }
-    setState((prev) => ({
-      ...prev,
-      loading: false,
-    }));
   };
 
   useEffect(() => {
     if (state.show) {
-      if (type !== "add" && clientData?.id) {
-        loadDetailClient(clientData.id);
+      if (type !== "add" && customerData?.id) {
+        loadDetailCustomer(customerData.id);
       }
     }
-  }, [type, state.show, loadDetailClient, clientData?.id]);
+  }, [type, state.show, loadDetailCustomer, customerData?.id]);
 
   const AlertFooter = () => {
     return (
@@ -130,6 +130,36 @@ export const ClientSheet = ({
       >
         OK
       </BaseButton>
+    );
+  };
+
+  const SheetFooter = () => {
+    return (
+      <div className="flex gap-4 items-center w-full">
+        <BaseButton
+          onClick={() => {
+            setState((prev) => ({
+              ...prev,
+              show: false,
+            }));
+            if (type === "add") {
+              resetForm();
+            }
+          }}
+          className="w-full"
+          model="transparent"
+          disabled={state.loading}
+        >
+          Discard
+        </BaseButton>
+        <BaseButton
+          className="w-full"
+          disabled={state.loading}
+          onClick={submitCustomer}
+        >
+          {state.loading ? "Loading..." : "Submit"}
+        </BaseButton>
+      </div>
     );
   };
   return (
@@ -157,24 +187,14 @@ export const ClientSheet = ({
         trigger={trigger}
         headerTitle={
           type === "add"
-            ? "Add Client"
+            ? "Add Customer"
             : type === "edit"
-            ? `Edit Client ${clientData?.name}`
-            : `Detail Client ${clientData?.name}`
+            ? `Edit Customer ${customerData?.name}`
+            : `Detail Customer ${customerData?.name}`
         }
-        footer={
-          type !== "detail" && (
-            <BaseButton disabled={state.loading} onClick={submitClient}>
-              {state.loading
-                ? "Loading..."
-                : type === "add"
-                ? "Add Client"
-                : "Update Client"}
-            </BaseButton>
-          )
-        }
+        footer={type !== "detail" && <SheetFooter />}
       >
-        <ClientForm type={type} form={form} setForm={setForm} />
+        <CustomerForm type={type} form={form} setForm={setForm} />
       </BaseSheet>
     </>
   );

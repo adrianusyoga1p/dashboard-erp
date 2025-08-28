@@ -1,30 +1,25 @@
-import { BaseButton } from "@/components/base/button";
-import { BaseSheet } from "@/components/base/sheet";
-import type { Admin, AdminPayload } from "@/types/admin";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { AdminForm } from "./admin-form";
-import {
-  apiCreateAdmin,
-  apiGetDetailAdmin,
-  apiUpdateAdmin,
-} from "@/api/endpoints/admin";
+import { apiGetListUnit } from "@/api/endpoints/unit";
+import { apiCreateUnitConversion } from "@/api/endpoints/unit-conversion";
 import BaseAlert from "@/components/base/alert";
-import type { Division } from "@/types/division";
-import { apiGetListDivision } from "@/api/endpoints/division";
+import { BaseButton } from "@/components/base/button";
+import type { Unit, UnitConversion, UnitConversionPayload } from "@/types/unit";
+import { useEffect, useState, type ReactNode } from "react";
+import { UnitConversionForm } from "./unit-conversion-form";
+import { BaseSheet } from "@/components/base/sheet";
 
-interface AdminSheetProps {
+interface UnitConversionSheetProps {
   type?: "add" | "edit" | "detail";
-  adminData?: Admin;
+  unitConversion?: UnitConversion;
   loadData: () => void;
   trigger?: ReactNode;
 }
 
-export const AdminSheet = ({
+export const UnitConversionSheet = ({
   type = "add",
-  adminData,
+  unitConversion,
   loadData,
   trigger,
-}: AdminSheetProps) => {
+}: UnitConversionSheetProps) => {
   const [state, setState] = useState({
     loading: false,
     show: false,
@@ -40,53 +35,28 @@ export const AdminSheet = ({
     message: "",
   });
 
-  const [form, setForm] = useState<
-    AdminPayload & {
-      fullName: string | null;
-      birthDate: string | null;
-      birthPlace: string | null;
-      address: string | null;
-    }
-  >({
+  const [form, setForm] = useState<UnitConversionPayload>({
     name: "",
-    email: "",
-    password: null,
-    gender: "male",
-    phoneNumber: "",
-    divisionId: "",
-    fullName: null,
-    birthDate: null,
-    birthPlace: null,
-    address: null,
+    baseUnitId: "",
+    toUnitId: "",
+    factor: null,
   });
 
   const resetForm = () => {
     setForm({
       name: "",
-      email: "",
-      password: null,
-      gender: "male",
-      phoneNumber: "",
-      divisionId: "",
-      fullName: null,
-      birthDate: null,
-      birthPlace: null,
-      address: null,
+      baseUnitId: "",
+      toUnitId: "",
+      factor: null,
     });
   };
 
-  const [division, setDivision] = useState<Division[]>([]);
-  const loadDivision = async (page = 1) => {
-    let allData: Division[] = [];
+  const [units, setUnits] = useState<Unit[]>([]);
+  const loadUnits = async (page = 1) => {
+    let allData: Unit[] = [];
 
     while (true) {
-      const res = await apiGetListDivision({
-        page,
-        limit: 20,
-        order: "desc",
-        orderBy: "createdAt",
-        active: true,
-      });
+      const res = await apiGetListUnit({ page, limit: 20 });
       if (res.error) break;
 
       const { data, meta } = res.data;
@@ -98,39 +68,24 @@ export const AdminSheet = ({
       page++;
     }
 
-    setDivision(allData);
+    setUnits(allData);
   };
 
-  const loadDetailAdmin = useCallback(async (id: string) => {
-    const { data } = await apiGetDetailAdmin(id);
-    if (data) {
-      setForm((prev) => ({
-        ...prev,
-        name: data?.name,
-        email: data?.email,
-        gender: data?.user.gender || null,
-        divisionId: data?.divisionId || "",
-        phoneNumber: data?.user.phoneNumber || null,
-        fullName: data.user.fullName || null,
-        birthDate: data.user.birthDate || null,
-        birthPlace: data.user.birthPlace || null,
-        address: data.user.address || null,
-      }));
+  useEffect(() => {
+    if (state.show) {
+      loadUnits();
     }
-  }, []);
+  }, [type, state.show]);
 
-  const submitAdmin = async () => {
+  const submitUnitConversion = async () => {
     setState(() => ({
       loading: true,
       show: true,
     }));
-    const { error } =
-      type === "add"
-        ? await apiCreateAdmin(form)
-        : await apiUpdateAdmin(adminData?.id as string, {
-            ...form,
-            password: undefined,
-          });
+    const { error } = await apiCreateUnitConversion({
+      ...form,
+      factor: Number(form.factor),
+    });
     if (!error) {
       resetForm();
       loadData();
@@ -156,15 +111,6 @@ export const AdminSheet = ({
     }
   };
 
-  useEffect(() => {
-    if (state.show) {
-      if (type !== "add" && adminData?.id) {
-        loadDetailAdmin(adminData.id);
-      }
-      loadDivision();
-    }
-  }, [type, state.show, loadDetailAdmin, adminData?.id]);
-
   const AlertFooter = () => {
     return (
       <BaseButton
@@ -189,9 +135,7 @@ export const AdminSheet = ({
               ...prev,
               show: false,
             }));
-            if (type === "add") {
-              resetForm();
-            }
+            resetForm();
           }}
           className="w-full"
           model="transparent"
@@ -202,7 +146,7 @@ export const AdminSheet = ({
         <BaseButton
           className="w-full"
           disabled={state.loading}
-          onClick={submitAdmin}
+          onClick={submitUnitConversion}
         >
           {state.loading ? "Loading..." : "Submit"}
         </BaseButton>
@@ -235,18 +179,18 @@ export const AdminSheet = ({
         trigger={trigger}
         headerTitle={
           type === "add"
-            ? "Add Admin"
+            ? "Add Unit Conversion"
             : type === "edit"
-            ? `Edit Admin ${adminData?.name}`
-            : `Detail Admin ${adminData?.name}`
+            ? `Edit Unit Conversion ${unitConversion?.name}`
+            : `Detail Unit Conversion ${unitConversion?.name}`
         }
         footer={type !== "detail" && <SheetFooter />}
       >
-        <AdminForm
+        <UnitConversionForm
           type={type}
           form={form}
           setForm={setForm}
-          division={division}
+          units={units}
         />
       </BaseSheet>
     </>

@@ -1,18 +1,19 @@
 // import { apiGetListUnit } from "@/api/endpoints/unit";
 // import type { Unit } from "@/types/unit";
-import { apiGetListCategory } from "@/api/endpoints/category";
+import { apiGetListProductCategory } from "@/api/endpoints/category";
 import {
   apiCreateProduct,
   apiGeDetailProduct,
   apiUpdateProduct,
 } from "@/api/endpoints/product";
 import { BaseSheet } from "@/components/base/sheet";
-import type { Category } from "@/types/category";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import type { Product, ProductPayload } from "@/types/product";
+import type { Product, ProductPayload, ProductCategory } from "@/types/product";
 import { ProductForm } from "./product-form";
 import { BaseButton } from "@/components/base/button";
 import BaseAlert from "@/components/base/alert";
+import { apiGetListUnit } from "@/api/endpoints/unit";
+import type { Unit } from "@/types/unit";
 
 interface ProductSheetProps {
   type?: "add" | "edit" | "detail";
@@ -27,25 +28,25 @@ export const ProductSheet = ({
   loadData,
   trigger,
 }: ProductSheetProps) => {
-  // const [unit, setUnit] = useState<Unit[]>([]);
-  // const loadUnit = async (page = 1) => {
-  //   let allData: Unit[] = [];
+  const [units, setUnits] = useState<Unit[]>([]);
+  const loadUnits = async (page = 1) => {
+    let allData: Unit[] = [];
 
-  //   while (true) {
-  //     const res = await apiGetListUnit({ page, limit: 20 });
-  //     if (res.error) break;
+    while (true) {
+      const res = await apiGetListUnit({ page, limit: 20 });
+      if (res.error) break;
 
-  //     const { data, meta } = res.data;
-  //     allData = [...allData, ...data];
+      const { data, meta } = res.data;
+      allData = [...allData, ...data];
 
-  //     const totalPage = meta.totalPage ?? 1;
+      const totalPage = meta.totalPage ?? 1;
 
-  //     if (page >= totalPage) break;
-  //     page++;
-  //   }
+      if (page >= totalPage) break;
+      page++;
+    }
 
-  //   setUnit(allData);
-  // };
+    setUnits(allData);
+  };
 
   const [state, setState] = useState({
     loading: false,
@@ -65,7 +66,7 @@ export const ProductSheet = ({
   const [form, setForm] = useState<ProductPayload>({
     name: "",
     brandName: "",
-    categoryId: "",
+    productCategoryId: "",
     code: "",
     description: "",
     price: null,
@@ -77,7 +78,7 @@ export const ProductSheet = ({
     setForm({
       name: "",
       brandName: "",
-      categoryId: "",
+      productCategoryId: "",
       code: "",
       description: "",
       price: null,
@@ -86,12 +87,12 @@ export const ProductSheet = ({
     });
   };
 
-  const [category, setCategory] = useState<Category[]>([]);
+  const [category, setCategory] = useState<ProductCategory[]>([]);
   const loadCategory = async (page = 1) => {
-    let allData: Category[] = [];
+    let allData: ProductCategory[] = [];
 
     while (true) {
-      const res = await apiGetListCategory({
+      const res = await apiGetListProductCategory({
         page,
         limit: 20,
         order: "desc",
@@ -120,10 +121,11 @@ export const ProductSheet = ({
         brandName: data?.brandName || "",
         code: data?.code || "",
         description: data?.description || "",
-        categoryId: data?.categoryId || "",
+        productCategoryId: data?.productCategoryId || "",
         price: data?.price || null,
         productSku: data?.productSku || "",
         active: data?.active,
+        baseUnitId: data.baseUnitId,
       });
     }
   }, []);
@@ -133,14 +135,14 @@ export const ProductSheet = ({
       loading: true,
       show: true,
     }));
-    const { data, error } =
+    const { error } =
       type === "add"
         ? await apiCreateProduct({ ...form, price: Number(form.price) })
         : await apiUpdateProduct(productData?.id as string, {
             ...form,
             price: Number(form.price),
           });
-    if (data) {
+    if (!error) {
       resetForm();
       loadData();
       setSubmitStatus({
@@ -148,8 +150,8 @@ export const ProductSheet = ({
         type: "success",
         message: "Your data is saved!",
       });
-      setState((prev) => ({
-        ...prev,
+      setState(() => ({
+        loading: false,
         show: false,
       }));
     } else {
@@ -158,11 +160,11 @@ export const ProductSheet = ({
         type: "error",
         message: error?.message || "",
       });
+      setState(() => ({
+        loading: false,
+        show: true,
+      }));
     }
-    setState((prev) => ({
-      ...prev,
-      loading: false,
-    }));
   };
 
   useEffect(() => {
@@ -171,6 +173,7 @@ export const ProductSheet = ({
         loadDetailProduct(productData.id);
       }
       loadCategory();
+      loadUnits();
     }
   }, [type, state.show, loadDetailProduct, productData?.id]);
 
@@ -186,6 +189,34 @@ export const ProductSheet = ({
       >
         OK
       </BaseButton>
+    );
+  };
+
+  const SheetFooter = () => {
+    return (
+      <div className="flex gap-4 items-center w-full">
+        <BaseButton
+          onClick={() => {
+            setState((prev) => ({
+              ...prev,
+              show: false,
+            }));
+            resetForm();
+          }}
+          className="w-full"
+          model="transparent"
+          disabled={state.loading}
+        >
+          Discard
+        </BaseButton>
+        <BaseButton
+          className="w-full"
+          disabled={state.loading}
+          onClick={submitProduct}
+        >
+          {state.loading ? "Loading..." : "Submit"}
+        </BaseButton>
+      </div>
     );
   };
 
@@ -219,23 +250,14 @@ export const ProductSheet = ({
             ? `Edit Product ${productData?.brandName}`
             : `Detail Product ${productData?.brandName}`
         }
-        footer={
-          type !== "detail" && (
-            <BaseButton disabled={state.loading} onClick={submitProduct}>
-              {state.loading
-                ? "Loading..."
-                : type === "add"
-                ? "Add Product"
-                : "Update Product"}
-            </BaseButton>
-          )
-        }
+        footer={type !== "detail" && <SheetFooter />}
       >
         <ProductForm
           type={type}
           form={form}
           setForm={setForm}
           category={category}
+          unit={units}
         />
       </BaseSheet>
     </>

@@ -1,26 +1,28 @@
+import { apiDeleteUnit, apiGetListUnit } from "@/api/endpoints/unit";
 import { useRole } from "@/hooks/useRole";
-import type { Client } from "@/types/client";
 import type { BaseParam } from "@/types/common";
+import type { Unit } from "@/types/unit";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ClientSheet } from "./client-sheet";
-import { BaseButton } from "@/components/base/button";
-import { BaseInput } from "@/components/base/input";
-import { apiDeleteClient, apiGetListClient } from "@/api/endpoints/client";
+import { UnitSheet } from "./unit-sheet";
 import { BaseTooltip } from "@/components/base/tooltip";
+import { BaseButton } from "@/components/base/button";
 import { LuEye, LuPencil, LuTrash } from "react-icons/lu";
 import BaseAlert from "@/components/base/alert";
+import { BaseInput } from "@/components/base/input";
 import BaseTable from "@/components/base/table";
+import { UnitModal } from "./unit-modal";
 
-export const CLientTable = () => {
+export const UnitTable = () => {
   const { canAccess } = useRole();
-  const [client, setClient] = useState<Client[]>([]);
-  const [params, setParams] = useState<BaseParam<Client>>({
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [params, setParams] = useState<BaseParam<Unit>>({
     page: 1,
     limit: 10,
     order: "desc",
     orderBy: "createdAt",
     keyword: null,
   });
+
   const [totalPage, setTotalPage] = useState(1);
   const [alertState, setAlertState] = useState({
     isOpen: false,
@@ -39,38 +41,46 @@ export const CLientTable = () => {
     }));
   };
 
-  const loadClient = useCallback(
+  const loadUnits = useCallback(
     async (keyword?: string | null) => {
-      const { data, error } = await apiGetListClient({
+      setAlertState((prev) => ({
+        ...prev,
+        loading: true,
+      }));
+      const { data, error } = await apiGetListUnit({
         ...params,
         keyword,
       });
       if (!error && data.data) {
-        setClient(data.data);
+        setUnits(data.data);
         if (data.meta) {
           setTotalPage(data.meta.totalPage ?? 1);
         }
       }
+      setAlertState((prev) => ({
+        ...prev,
+        loading: false,
+      }));
     },
     [params.page, params.limit, params.order, params.orderBy]
   );
 
-  const deleteClient = async (id: string) => {
+  const deleteUnit = async (id: string) => {
     setAlertState({
       isOpen: true,
       type: "warning",
       title: "Delete Confirmation",
-      message: "Are you sure you want to delete this data?",
+      message: "Are you sure you want to delete this unit?",
       onConfirm: async () => {
-        const { data, error } = await apiDeleteClient(id);
+        const { data, error } = await apiDeleteUnit(id);
         setAlertState({
           isOpen: true,
           type: data ? "success" : "error",
           title: data ? "Success" : "Error",
           message: data
-            ? "Data deleted successfully!"
-            : error?.message || "Failed to delete data client",
-          onConfirm: () => loadClient(),
+            ? "Unit deleted successfully!"
+            : error?.message || "Failed to delete unit",
+          onConfirm: () => loadUnits(),
           showCancel: false,
           loading: data || error ? false : true,
         });
@@ -80,15 +90,15 @@ export const CLientTable = () => {
     });
   };
 
-  const clientTableSlots = {
-    actions: (client: Client) => (
+  const unitTableSlots = {
+    actions: (unit: Unit) => (
       <div className="flex items-center justify-center gap-2">
-        {canAccess("client_read") && (
-          <ClientSheet
+        {canAccess("unit_read") && (
+          <UnitSheet
             type="detail"
-            clientData={client}
+            unitData={unit}
             loadData={() => {
-              loadClient("");
+              loadUnits();
             }}
             trigger={
               <div>
@@ -99,19 +109,19 @@ export const CLientTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Detail Client</p>
+                  <p>Detail</p>
                 </BaseTooltip>
               </div>
             }
           />
         )}
 
-        {canAccess("client_update") && (
-          <ClientSheet
+        {canAccess("unit_update") && (
+          <UnitSheet
             type="edit"
-            clientData={client}
+            unitData={unit}
             loadData={() => {
-              loadClient("");
+              loadUnits();
             }}
             trigger={
               <div>
@@ -122,27 +132,27 @@ export const CLientTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Edit Client</p>
+                  <p>Edit</p>
                 </BaseTooltip>
               </div>
             }
           />
         )}
 
-        {canAccess("client_delete") && (
+        {canAccess("unit_delete") && (
           <BaseTooltip
             trigger={
               <BaseButton
                 model="outline"
                 size="sm"
                 className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500"
-                onClick={() => deleteClient(client.id)}
+                onClick={() => deleteUnit(unit.id)}
               >
                 <LuTrash />
               </BaseButton>
             }
           >
-            <p>Delete Sales</p>
+            <p>Delete</p>
           </BaseTooltip>
         )}
       </div>
@@ -150,19 +160,19 @@ export const CLientTable = () => {
   };
 
   useEffect(() => {
-    loadClient(params.keyword);
-  }, [loadClient]);
+    loadUnits(params.keyword);
+  }, [loadUnits]);
 
   const handleSearch = useCallback(
     (e?: FormEvent) => {
       e?.preventDefault();
-      loadClient(params.keyword);
+      loadUnits(params.keyword);
       setParams((prev) => ({
         ...prev,
         page: 1,
       }));
     },
-    [params.keyword, loadClient]
+    [params.keyword, loadUnits]
   );
 
   const AlertFooter = () => {
@@ -223,34 +233,40 @@ export const CLientTable = () => {
               placeholder="Search keyword..."
             />
           </form>
-          {canAccess("client_create") && (
-            <ClientSheet
-              type="add"
-              loadData={() => {
-                loadClient();
-                params.keyword = null;
-              }}
-              trigger={<BaseButton>Add Client</BaseButton>}
+          <div className="flex gap-4 items-center">
+            <UnitModal
+              loadData={loadUnits}
+              trigger={<BaseButton model="outline">Import Data</BaseButton>}
             />
-          )}
+            {canAccess("unit_create") && (
+              <UnitSheet
+                type="add"
+                loadData={() => {
+                  loadUnits();
+                  params.keyword = null;
+                }}
+                trigger={<BaseButton>Add Unit</BaseButton>}
+              />
+            )}
+          </div>
         </div>
-        <BaseTable<Client>
+        <BaseTable<Unit>
           columns={[
             { title: "#", key: "id", type: "increment" },
             { title: "Actions", key: "actions", type: "slot" },
-            { title: "Client Name", key: "name" },
-            { title: "Store Name", key: "storeName" },
-            { title: "Email", key: "email" },
-            { title: "Phone Number", key: "phoneNumber" },
-            { title: "Address", key: "address" },
+            { title: "Name", key: "name", className: "relative" },
+            { title: "Code", key: "code" },
+            { title: "Unit Category", key: "unitCategory.name" },
             { title: "Created At", key: "createdAt", type: "datetime" },
           ]}
-          source={client}
+          source={units}
           page={params.page || 1}
-          slot={clientTableSlots}
+          slot={unitTableSlots}
           total={totalPage}
           limit={params.limit || 10}
           onPageChange={onPageChange}
+          noDataText="Data unit is empty"
+          loading={alertState.loading}
         />
       </div>
     </>

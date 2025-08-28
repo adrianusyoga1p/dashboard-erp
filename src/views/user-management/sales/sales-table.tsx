@@ -41,6 +41,10 @@ export const SalesTable = () => {
 
   const loadSales = useCallback(
     async (keyword?: string | null) => {
+      setAlertState((prev) => ({
+        ...prev,
+        loading: true,
+      }));
       const { data, error } = await apiGetListSales({
         ...params,
         keyword,
@@ -51,6 +55,10 @@ export const SalesTable = () => {
           setTotalPage(data.meta.totalPage ?? 1);
         }
       }
+      setAlertState((prev) => ({
+        ...prev,
+        loading: false,
+      }));
     },
     [params.page, params.limit, params.order, params.orderBy]
   );
@@ -88,7 +96,7 @@ export const SalesTable = () => {
             type="detail"
             salesData={sales}
             loadData={() => {
-              loadSales("");
+              loadSales();
             }}
             trigger={
               <div>
@@ -99,7 +107,7 @@ export const SalesTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Detail Sales</p>
+                  <p>Detail</p>
                 </BaseTooltip>
               </div>
             }
@@ -111,7 +119,7 @@ export const SalesTable = () => {
             type="edit"
             salesData={sales}
             loadData={() => {
-              loadSales("");
+              loadSales();
             }}
             trigger={
               <div>
@@ -122,7 +130,7 @@ export const SalesTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Edit Sales</p>
+                  <p>Edit</p>
                 </BaseTooltip>
               </div>
             }
@@ -142,7 +150,7 @@ export const SalesTable = () => {
               </BaseButton>
             }
           >
-            <p>Delete Sales</p>
+            <p>Delete</p>
           </BaseTooltip>
         )}
       </div>
@@ -253,6 +261,8 @@ export const SalesTable = () => {
           total={totalPage}
           limit={params.limit || 10}
           onPageChange={onPageChange}
+          noDataText="Data sales is empty"
+          loading={alertState.loading}
         />
       </div>
     </>

@@ -1,4 +1,5 @@
 import { BaseInput } from "@/components/base/input";
+import { BaseSwitch } from "@/components/base/switch";
 import type { SalesPayload } from "@/types/sales";
 import { type ChangeEvent } from "react";
 
@@ -100,6 +101,18 @@ export const SalesForm = ({
         name="address"
         value={form.address as string}
         disabled={type == "detail"}
+      />
+      <BaseSwitch
+        checked={form.active}
+        label="Sales Active"
+        disabled={type === "detail"}
+        name="active"
+        onCheckedChange={(checked: boolean) =>
+          setForm({
+            ...form,
+            active: checked,
+          })
+        }
       />
     </div>
   );

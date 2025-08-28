@@ -44,6 +44,10 @@ export const DivisionTable = () => {
 
   const loadDivisions = useCallback(
     async (keyword?: string | null) => {
+      setAlertState((prev) => ({
+        ...prev,
+        loading: true,
+      }));
       const { data, error } = await apiGetListDivision({
         ...params,
         keyword,
@@ -54,6 +58,10 @@ export const DivisionTable = () => {
           setTotalPage(data.meta.totalPage ?? 1);
         }
       }
+      setAlertState((prev) => ({
+        ...prev,
+        loading: false,
+      }));
     },
     [params.page, params.limit, params.order, params.orderBy]
   );
@@ -91,7 +99,7 @@ export const DivisionTable = () => {
             type="detail"
             divisionData={division}
             loadData={() => {
-              loadDivisions(null);
+              loadDivisions();
             }}
             trigger={
               <div>
@@ -102,7 +110,7 @@ export const DivisionTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Detail Division</p>
+                  <p>Detail</p>
                 </BaseTooltip>
               </div>
             }
@@ -114,7 +122,7 @@ export const DivisionTable = () => {
             type="edit"
             divisionData={division}
             loadData={() => {
-              loadDivisions(null);
+              loadDivisions();
             }}
             trigger={
               <div>
@@ -125,7 +133,7 @@ export const DivisionTable = () => {
                     </BaseButton>
                   }
                 >
-                  <p>Edit Division</p>
+                  <p>Edit</p>
                 </BaseTooltip>
               </div>
             }
@@ -145,7 +153,7 @@ export const DivisionTable = () => {
               </BaseButton>
             }
           >
-            <p>Delete Division</p>
+            <p>Delete</p>
           </BaseTooltip>
         )}
       </div>
@@ -251,6 +259,8 @@ export const DivisionTable = () => {
           total={totalPage}
           limit={params.limit || 10}
           onPageChange={onPageChange}
+          noDataText="Data division is empty"
+          loading={alertState.loading}
         />
       </div>
     </>

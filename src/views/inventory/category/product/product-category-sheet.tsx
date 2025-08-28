@@ -1,28 +1,28 @@
 import {
-  apiCreateCategory,
-  apiGetDetailCategory,
-  apiUpdateCategory,
+  apiCreateProductCategory,
+  apiGetDetailProductCategory,
+  apiUpdateProductCategory,
 } from "@/api/endpoints/category";
 import { BaseSheet } from "@/components/base/sheet";
-import type { Category } from "@/types/category";
 import { useCallback, useEffect, useState } from "react";
-import { CategoryForm } from "./category-form";
+import { ProductCategoryForm } from "./product-category-form";
 import BaseAlert from "@/components/base/alert";
 import { BaseButton } from "@/components/base/button";
+import type { ProductCategory } from "@/types/product";
 
-interface CategorySheetProps {
+interface ProductCategorySheetProps {
   type?: "add" | "edit" | "detail";
-  categoryData?: Category;
+  productCategoryData?: ProductCategory;
   loadData: () => void;
   trigger?: React.ReactNode;
 }
 
-export const CategorySheet = ({
+export const ProductCategorySheet = ({
   type = "add",
-  categoryData,
+  productCategoryData,
   loadData,
   trigger,
-}: CategorySheetProps) => {
+}: ProductCategorySheetProps) => {
   const [state, setState] = useState({
     loading: false,
     show: false,
@@ -50,8 +50,8 @@ export const CategorySheet = ({
     });
   };
 
-  const loadDetailCategory = useCallback(async (id: string) => {
-    const { data } = await apiGetDetailCategory(id);
+  const loadDetailProductCategory = useCallback(async (id: string) => {
+    const { data } = await apiGetDetailProductCategory(id);
     if (data) {
       setForm({
         name: data?.name,
@@ -60,19 +60,19 @@ export const CategorySheet = ({
     }
   }, []);
 
-  const submitCategory = async () => {
+  const submitProductCategory = async () => {
     setState(() => ({
       loading: true,
       show: true,
     }));
-    const { data, error } =
+    const { error } =
       type === "add"
-        ? await apiCreateCategory({ ...form, active: true })
-        : await apiUpdateCategory(categoryData?.id as string, {
+        ? await apiCreateProductCategory({ ...form, active: true })
+        : await apiUpdateProductCategory(productCategoryData?.id as string, {
             ...form,
             active: true,
           });
-    if (data) {
+    if (!error) {
       resetForm();
       loadData();
       setSubmitStatus({
@@ -80,8 +80,8 @@ export const CategorySheet = ({
         type: "success",
         message: "Your data is saved!",
       });
-      setState((prev) => ({
-        ...prev,
+      setState(() => ({
+        loading: false,
         show: false,
       }));
     } else {
@@ -90,20 +90,20 @@ export const CategorySheet = ({
         type: "error",
         message: error?.message || "",
       });
+      setState(() => ({
+        loading: false,
+        show: true,
+      }));
     }
-    setState((prev) => ({
-      ...prev,
-      loading: false,
-    }));
   };
 
   useEffect(() => {
     if (state.show) {
-      if (type !== "add" && categoryData?.id) {
-        loadDetailCategory(categoryData.id);
+      if (type !== "add" && productCategoryData?.id) {
+        loadDetailProductCategory(productCategoryData.id);
       }
     }
-  }, [type, state.show, loadDetailCategory]);
+  }, [type, state.show, loadDetailProductCategory]);
 
   const AlertFooter = () => {
     return (
@@ -117,6 +117,34 @@ export const CategorySheet = ({
       >
         OK
       </BaseButton>
+    );
+  };
+
+  const SheetFooter = () => {
+    return (
+      <div className="flex gap-4 items-center w-full">
+        <BaseButton
+          onClick={() => {
+            setState((prev) => ({
+              ...prev,
+              show: false,
+            }));
+            resetForm();
+          }}
+          className="w-full"
+          model="transparent"
+          disabled={state.loading}
+        >
+          Discard
+        </BaseButton>
+        <BaseButton
+          className="w-full"
+          disabled={state.loading}
+          onClick={submitProductCategory}
+        >
+          {state.loading ? "Loading..." : "Submit"}
+        </BaseButton>
+      </div>
     );
   };
 
@@ -145,24 +173,14 @@ export const CategorySheet = ({
         }}
         headerTitle={
           type === "add"
-            ? "Add Category"
+            ? "Add Product Category"
             : type === "edit"
-            ? `Edit Category ${categoryData?.name}`
-            : `Detail Category ${categoryData?.name}`
+            ? `Edit Product Category ${productCategoryData?.name}`
+            : `Detail Product Category ${productCategoryData?.name}`
         }
-        footer={
-          type !== "detail" && (
-            <BaseButton disabled={state.loading} onClick={submitCategory}>
-              {state.loading
-                ? "Loading..."
-                : type === "add"
-                ? "Add Category"
-                : "Update Category"}
-            </BaseButton>
-          )
-        }
+        footer={type !== "detail" && <SheetFooter />}
       >
-        <CategoryForm type={type} form={form} setForm={setForm} />
+        <ProductCategoryForm type={type} form={form} setForm={setForm} />
       </BaseSheet>
     </>
   );
