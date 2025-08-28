@@ -1,4 +1,4 @@
-export type Client = {
+export type Customer = {
   id: string;
   name: string;
   phoneNumber: string;
@@ -11,7 +11,7 @@ export type Client = {
   createdAt: string;
 };
 
-export type ClientPayload = {
+export type CustomerPayload = {
   name: string;
   phoneNumber: string;
   email: string | null;

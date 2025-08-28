@@ -1,4 +1,4 @@
-import type { Client } from "./client";
+import type { Customer } from "./customer";
 import type { Sales } from "./sales";
 
 export type OrderItems = {
@@ -15,7 +15,7 @@ export type OrderItems = {
 
 export type ReportOrder = {
   id: string;
-  clientId: string;
+  customerId: string;
   salesId: string;
   productIds: string[];
   totalAmount: number;
@@ -27,7 +27,7 @@ export type ReportOrder = {
   typeOrder: "cash" | "consignment" | "tempo";
   createdAt: string;
   updatedAt: string;
-  client: Client;
+  customer: Customer;
   sales: Sales;
   orderItems: OrderItems[];
 };

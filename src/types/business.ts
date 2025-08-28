@@ -1,0 +1,20 @@
+export type Business = {
+  id: string;
+  name: string;
+  email: string;
+  phoneNumber: string;
+  address: string | null;
+  active: boolean;
+  dashboardPrimaryColor: string | null;
+  dashboardSecondaryColor: string | null;
+  companyName: string | null;
+  companyEmail: string | null;
+  companyAddress: string | null;
+  companyPhoneNumber: string | null;
+  updatedAt: string;
+  createdAt: string;
+  logoImageId: string | null;
+  logoImageUrl: string | null;
+  logoImageType: string | null;
+  logoImageFileName: string | null;
+};

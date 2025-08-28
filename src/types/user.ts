@@ -1,3 +1,4 @@
+import type { Business } from "./business";
 import type { Division } from "./division";
 import type { Role } from "./role";
 
@@ -33,4 +34,6 @@ export type User = {
   sales?: UserAccount;
   role: Role | null;
   division?: Division | null;
+  businessId: string;
+  business?: Business;
 };

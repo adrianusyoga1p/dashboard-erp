@@ -22,10 +22,26 @@ export type AnalyticStockReturn = {
   } & SummaryReturn;
 };
 
-type Product = {
+export type AnalyticTopProduct = {
+  productId: string;
+  qtyOrder: number;
+  productName: string;
+  productBrandName: string;
+  productCategoryName: string;
+};
+
+export type AnalyticDailyRevenue = {
+  date: "2025-08-23";
+  revenue: 2760000;
+  product: AnalyticProduct[];
+};
+
+type AnalyticProduct = {
   id: string;
   name: string;
   brandName: string;
+  productSku?: string;
+  productCategoryName?: string;
   price: number;
   qtyIn: number;
   reason: string;
@@ -45,12 +61,12 @@ type SummaryReturn = {
 
 type ProductIn = {
   stockInDate: string;
-} & Product;
+} & AnalyticProduct;
 
 type ProductOut = {
   stockOutDate: string;
-} & Product;
+} & AnalyticProduct;
 
 type ProductReturn = {
   stockReturnDate: string;
-} & Product;
+} & AnalyticProduct;
