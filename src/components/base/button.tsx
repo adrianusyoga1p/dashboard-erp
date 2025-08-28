@@ -1,17 +1,32 @@
 import { cn } from "@/utils/utils";
 import * as React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, type NavLinkProps } from "react-router-dom";
 
-interface BaseButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type BaseButtonCommon = {
   size?: "sm" | "md" | "lg";
   model?: "outline" | "fill" | "transparent";
-  href?: string;
   label?: string;
   children?: React.ReactNode;
-}
+  href?: NavLinkProps["to"];
+  className?: string;
+  type?: "button" | "submit" | "reset";
+};
 
-const BaseButton = React.forwardRef<HTMLButtonElement, BaseButtonProps>(
+type BaseButtonAsButton = BaseButtonCommon & {
+  href?: undefined;
+  type?: "button" | "submit" | "reset";
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
+
+type BaseButtonAsLink = BaseButtonCommon & {
+  href: string;
+} & Omit<NavLinkProps, "to" | "type">;
+
+type BaseButtonProps = BaseButtonAsButton | BaseButtonAsLink;
+
+const BaseButton = React.forwardRef<
+  HTMLButtonElement | HTMLAnchorElement,
+  BaseButtonProps
+>(
   (
     {
       className,
@@ -19,7 +34,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, BaseButtonProps>(
       model = "fill",
       size = "md",
       href,
-      type,
+      type = "button",
       children,
       ...props
     },
@@ -28,8 +43,9 @@ const BaseButton = React.forwardRef<HTMLButtonElement, BaseButtonProps>(
     const modelClasses = {
       fill: "bg-black text-white border-black hover:bg-black/70 hover:border-black/0",
       outline:
-        "text-black border-black/40 hover:bg-black/90 hover:text-white hover:border-black/0 bg-transparent",
-      transparent: "text-black bg-transparent border-transparent",
+        "text-black border-black/40 hover:bg-black/20 hover:text-black/70 hover:border-transparent bg-transparent",
+      transparent:
+        "text-black bg-transparent border-transparent hover:bg-gray-500/5",
     };
 
     const sizeClasses = {
@@ -37,35 +53,29 @@ const BaseButton = React.forwardRef<HTMLButtonElement, BaseButtonProps>(
       md: "px-4 py-2 rounded-lg",
       lg: "px-6 py-3 rounded-xl text-xl",
     };
-    const buttonRef = React.useRef<HTMLButtonElement | null>(null);
-    const mergedRef = (node: HTMLElement | null) => {
-      buttonRef.current = node as HTMLButtonElement;
-      if (typeof ref === "function") {
-        ref(node as HTMLButtonElement);
-      } else if (ref) {
-        (ref as React.MutableRefObject<HTMLElement | null>).current = node;
-      }
-    };
+
     if (href) {
       return (
         <NavLink
-          ref={mergedRef}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+          to={href}
           className={cn(
             "flex gap-2 border transition-colors duration-200 justify-center items-center disabled:bg-black/40",
             modelClasses[model],
             sizeClasses[size],
             className
           )}
-          to={href as string}
+          {...(props as Omit<NavLinkProps, "to">)}
         >
           {label && <span>{label}</span>}
           {children}
         </NavLink>
       );
     }
+
     return (
       <button
-        ref={mergedRef}
+        ref={ref as React.Ref<HTMLButtonElement>}
         className={cn(
           "cursor-pointer disabled:cursor-default flex gap-2 border transition-colors duration-200 justify-center items-center disabled:bg-black/40 disabled:border-black/0",
           modelClasses[model],
@@ -73,7 +83,7 @@ const BaseButton = React.forwardRef<HTMLButtonElement, BaseButtonProps>(
           className
         )}
         type={type}
-        {...props}
+        {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
       >
         {label && <span>{label}</span>}
         {children}
