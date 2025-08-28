@@ -7,10 +7,10 @@ import {
   useMapEvents,
   type MapContainerProps,
 } from "react-leaflet";
-import type { ClientPayload } from "@/types/client";
+import type { CustomerPayload } from "@/types/customer";
 
 interface BaseMapsProps extends MapContainerProps {
-  setForm: React.Dispatch<React.SetStateAction<ClientPayload>>;
+  setForm: React.Dispatch<React.SetStateAction<CustomerPayload>>;
   position: [number, number];
   popUp?: ReactNode;
 }
@@ -18,7 +18,7 @@ interface BaseMapsProps extends MapContainerProps {
 function LocationPicker({
   setForm,
 }: {
-  setForm: React.Dispatch<React.SetStateAction<ClientPayload>>;
+  setForm: React.Dispatch<React.SetStateAction<CustomerPayload>>;
 }) {
   useMapEvents({
     click(e) {
