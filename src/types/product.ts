@@ -1,11 +1,10 @@
-import type { Category } from "./category";
 import type { Unit } from "./unit";
 
 export type Product = {
   id: string;
   name: string | null;
   brandName: string | null;
-  categoryId: string | null;
+  productCategoryId: string | null;
   price: number;
   code: string | null;
   productSku: string | null;
@@ -13,7 +12,7 @@ export type Product = {
   active: boolean;
   updateAt: string;
   createdAt: string;
-  category: Category | null;
+  productCategory: ProductCategory | null;
   currentQty: number;
   minimumStock: number;
   unitInfo: {
@@ -24,6 +23,8 @@ export type Product = {
     baseUnit: Unit;
     smallestUnit: Unit;
   } | null;
+  baseUnitId: string | null;
+  baseUnit: Unit | null;
 };
 
 export type ProductPayload = {
@@ -31,8 +32,18 @@ export type ProductPayload = {
   brandName: string | null;
   code: string | null;
   description: string | null;
-  categoryId: string | null;
+  baseUnitId?: string | null;
+  productCategoryId: string | null;
   price: number | null;
   productSku: string | null;
   active: boolean;
 };
+
+export type ProductCategory = {
+  id: string;
+  name: string;
+  code: string;
+  active?: boolean;
+  updatedAt: string;
+  createdAt: string;
+}
