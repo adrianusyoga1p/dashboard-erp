@@ -23,16 +23,16 @@ function RootLayout() {
     }
   }, [user, token]);
 
-  const isMobile = useScreen("(max-width: 640px)");
+  const isResponsive = useScreen("(max-width: 1024px)");
   const { showSidebar, setShow } = useUIStore();
 
   useEffect(() => {
-    if (isMobile) {
+    if (isResponsive) {
       setShow(false);
     } else {
       setShow(true);
     }
-  }, [isMobile]);
+  }, [isResponsive]);
 
   return (
     <>
@@ -40,7 +40,7 @@ function RootLayout() {
       <LayoutSidebar />
       <main
         className={`p-6 mt-16 transition-all duration-300 ${
-          isMobile ? "ml-0" : showSidebar ? "ml-60" : "ml-0"
+          isResponsive ? "ml-0" : showSidebar ? "ml-60" : "ml-0"
         }`}
       >
         <div className="relative">
