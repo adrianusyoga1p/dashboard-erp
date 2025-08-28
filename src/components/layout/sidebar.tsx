@@ -5,12 +5,14 @@ import {
   LuUser,
   LuClipboardList,
   LuX,
+  LuSettings,
 } from "react-icons/lu";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useRole } from "@/hooks/useRole";
 import { useScreen } from "@/hooks/useScreen";
 import { useUIStore } from "@/stores/ui";
+import { useAuthStore } from "@/stores/auth";
 
 type MenuItem = {
   label: string;
@@ -46,22 +48,28 @@ const menuChild = (
 
 export const LayoutSidebar = () => {
   const { pathname } = useLocation();
+  const { user } = useAuthStore();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const { hasGroup } = useRole();
 
   const menuSidebar: MenuItem[] = [
     menuItem("Dashboard", "/", <LuLayoutDashboard />, hasGroup("dashboard")),
     menuItem("Inventory", undefined, <LuPackage />, true, [
-      menuChild("/category", "Category", hasGroup("category")),
+      menuChild("/product-category", "Category", hasGroup("category")),
       menuChild("/product", "Product", hasGroup("product")),
-      menuChild("/stock-in", "Stock In", hasGroup("stock_in")),
-      // menuChild("/stock-out", "Stock Out", hasGroup("stock")),
+      menuChild("/unit", "Unit", hasGroup("unit")),
+      menuChild(
+        "/unit-conversion",
+        "Unit Conversion",
+        hasGroup("unit-conversion")
+      ),
+      menuChild("/stock-in", "Stock", hasGroup("stock")),
     ]),
     menuItem("User Management", undefined, <LuUser />, true, [
       menuChild("/division", "Division", hasGroup("division")),
       menuChild("/admin", "Admin", hasGroup("admin")),
       menuChild("/sales", "Sales", hasGroup("sales")),
-      menuChild("/client", "Client", hasGroup("client")),
+      menuChild("/customer", "Customer", hasGroup("customer")),
       menuChild("/user", "User", hasGroup("user")),
     ]),
     menuItem(
@@ -70,11 +78,12 @@ export const LayoutSidebar = () => {
       <LuClipboardList />,
       hasGroup("order")
     ),
+    menuItem("Settings", "/settings", <LuSettings />, hasGroup("settings")),
   ];
 
   const isActive = (path?: string) => {
     if (!path) return false;
-    return pathname === path || (path !== "/" && pathname.startsWith(path));
+    return pathname === path;
   };
 
   const canShow = (item: MenuItem) => {
@@ -99,21 +108,21 @@ export const LayoutSidebar = () => {
     setExpandedIndex((prev) => (prev === index ? null : index));
   };
 
-  const isMobile = useScreen("(max-width: 640px)");
+  const isResponsive = useScreen("(max-width: 1024px)");
   const { toggleSidebar, showSidebar, setShow } = useUIStore();
 
   useEffect(() => {
-    if (isMobile) {
+    if (isResponsive) {
       setShow(false);
     } else {
       setShow(true);
     }
-  }, [isMobile, pathname]);
+  }, [isResponsive, pathname]);
 
   return (
     <aside
       className={`fixed left-0 top-0 bg-white w-60 min-h-dvh z-20 border-r border-gray-200 transition-transform duration-300 ${
-        isMobile
+        isResponsive
           ? showSidebar
             ? "translate-x-0"
             : "-translate-x-full"
@@ -123,10 +132,14 @@ export const LayoutSidebar = () => {
       }`}
     >
       <div className="h-16 py-3 px-7 flex items-center gap-4 justify-between relative">
-        <Link to={'/'}>
-          <img src="/img/logo.png" alt="logo" className="h-7 object-contain" />
+        <Link to={"/"}>
+          <img
+            src={user?.business?.logoImageUrl || `/img/logo.png`}
+            alt="logo"
+            className="h-7 object-contain"
+          />
         </Link>
-        {isMobile && (
+        {isResponsive && (
           <button
             onClick={toggleSidebar}
             className="flex items-center justify-center"
@@ -135,7 +148,7 @@ export const LayoutSidebar = () => {
           </button>
         )}
       </div>
-      <div className="flex flex-col gap-1 p-3">
+      <div className="flex flex-col gap-1 p-3 h-[calc(100dvh-4rem)] no-scrollbar overflow-y-auto">
         {menuSidebar.map((menu, index) =>
           canShow(menu) ? (
             menu.children ? (
